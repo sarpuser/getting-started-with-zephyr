@@ -116,61 +116,9 @@ All needed software will be pre-installed for the in-person class. For future re
 completed lab code can be found at:
 [github.com/sarpuser/getting-started-with-zephyt](https://github.com/sarpuser/getting-started-with-zephyt)
 
-### Install the Zephyr SDK
+### Install required software
 
-Follow the Zephyr Getting Started Guide before proceeding with any lab, complete the full setup at **[Getting Started with Zephyr RTOS](https://docs.zephyrproject.org/latest/develop/getting_started/index.html)**.
-
-This guide installs the Zephyr SDK, west, and the Python virtual environment used throughout all labs.
-
-### Install OpenOCD
-
-<Tabs groupId="os">
-  <TabItem value="linux" label="Ubuntu">
-
-  ```bash
-  sudo apt install openocd
-  ```
-
-  Verify with `openocd --version`. Ensure `openocd` is on your `PATH`.
-
-  Reference: [Zephyr host-tools  -  OpenOCD](https://docs.zephyrproject.org/latest/develop/flash_debug/host-tools.html#openocd-debug-host-tools)
-
-  </TabItem>
-  <TabItem value="macos" label="macOS">
-
-  ```bash
-  brew install openocd
-  ```
-
-  Verify with `openocd --version`. Homebrew adds it to your `PATH` automatically.
-
-  Reference: [Zephyr host-tools  -  OpenOCD](https://docs.zephyrproject.org/latest/develop/flash_debug/host-tools.html#openocd-debug-host-tools)
-
-  </TabItem>
-  <TabItem value="windows" label="Windows">
-
-  Download the pre-built Windows binary from the [Zephyr host-tools page](https://docs.zephyrproject.org/latest/develop/flash_debug/host-tools.html#openocd-debug-host-tools)
-  and extract it to a folder of your choice (e.g. `C:\openocd`).
-
-  **Add OpenOCD to your system PATH:**
-
-  1. Press **Win + S** and search for **"Edit the system environment variables"**, then click it.
-  2. In the System Properties dialog, click **Environment Variables...**.
-  3. Under **System variables**, select **Path** and click **Edit...**.
-  4. Click **New** and enter the full path to the OpenOCD `bin\` folder (e.g. `C:\openocd\bin`).
-  5. Click **OK** on all dialogs to save, then **reboot**.
-
-  {/* TODO: add screenshot of the Environment Variables dialog with the OpenOCD bin path entered */}
-  ![Windows Environment Variables dialog showing OpenOCD bin path added to Path](/images/windows_openocd_path.png)
-
-  Verify the install by opening a new PowerShell window and running:
-
-  ```powershell
-  openocd --version
-  ```
-
-  </TabItem>
-</Tabs>
+See [Appendix A: Host PC Setup Guide](/appendices/appendix-a)
 
 ## Navigation
 

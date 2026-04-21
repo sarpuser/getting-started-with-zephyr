@@ -1,8 +1,8 @@
 ---
 title: "Appendix A: Host PC Setup Guide"
-sidebar_label: "Appendix A – Host PC Setup"
+sidebar_label: "Appendix A: Host PC Setup"
 sidebar_position: 1
-slug: /docs/appendices/appendix-a
+slug: appendix-a
 ---
 
 import Tabs from '@theme/Tabs';
@@ -25,11 +25,8 @@ OpenOCD must be installed separately from the Zephyr SDK. Even if your Zephyr en
 <Tabs groupId="os">
 <TabItem value="linux" label="Ubuntu">
 
-Install OpenOCD via `apt` and confirm it is available on your PATH:
-
 ```bash
 sudo apt install openocd
-which openocd
 ```
 
 Reference: [OpenOCD Debug Host Tools  -  Zephyr Docs](https://docs.zephyrproject.org/latest/develop/flash_debug/host-tools.html#openocd-debug-host-tools)
@@ -37,21 +34,36 @@ Reference: [OpenOCD Debug Host Tools  -  Zephyr Docs](https://docs.zephyrproject
 </TabItem>
 <TabItem value="macos" label="macOS">
 
-Install OpenOCD via Homebrew:
+Install OpenOCD via [Homebrew](https://brew.sh/):
 
 ```bash
 brew install openocd
 ```
 
-Reference: [OpenOCD Debug Host Tools  -  Zephyr Docs](https://docs.zephyrproject.org/latest/develop/flash_debug/host-tools.html#openocd-debug-host-tools)
+Reference: [OpenOCD Debug Host Tools - Zephyr Docs](https://docs.zephyrproject.org/latest/develop/flash_debug/host-tools.html#openocd-debug-host-tools)
 
 </TabItem>
 <TabItem value="windows" label="Windows">
 
-Download and install the OpenOCD binary for Windows, then add the OpenOCD `bin/` directory to your system PATH and reboot your machine for the change to take effect.
+Download the pre-built Windows binary from the [Zephyr host-tools page](https://docs.zephyrproject.org/latest/develop/flash_debug/host-tools.html#openocd-debug-host-tools)
+  and extract it to a folder of your choice (e.g. `C:\openocd`).
 
-- Reference: [OpenOCD Debug Host Tools  -  Zephyr Docs](https://docs.zephyrproject.org/latest/develop/flash_debug/host-tools.html#openocd-debug-host-tools)
-- PATH guide: [Add to the PATH on Windows 10](https://www.architectryan.com/2018/03/17/add-to-the-path-on-windows-10/)
+  **Add OpenOCD to your system PATH:**
+
+  1. Press **Win + S** and search for **"Edit the system environment variables"**, then click it.
+  2. In the System Properties dialog, click **Environment Variables...**.
+  3. Under **System variables**, select **Path** and click **Edit...**.
+  4. Click **New** and enter the full path to the OpenOCD `bin\` folder (e.g. `C:\openocd\bin`).
+  5. Click **OK** on all dialogs to save, then **reboot**.
+
+  {/* TODO: add screenshot of the Environment Variables dialog with the OpenOCD bin path entered */}
+  ![Windows Environment Variables dialog showing OpenOCD bin path added to Path](/images/windows_openocd_path.png)
+
+  Verify the install by opening a new PowerShell window and running:
+
+  ```powershell
+  openocd --version
+  ```
 
 </TabItem>
 </Tabs>
@@ -63,9 +75,3 @@ Download and install Visual Studio Code for your platform:
 [https://code.visualstudio.com/download](https://code.visualstudio.com/download)
 
 Once installed, open VSCode and navigate to the **Extensions Marketplace** (Ctrl+Shift+X / Cmd+Shift+X). Search for and install the **Serial Monitor** extension.
-
----
-
-:::info Platform compatibility note
-The original lab was developed on a Windows 10 host. The WINC1500 firmware flashing procedure in Supplement C requires a Windows machine. All other lab steps are fully compatible with macOS and Linux.
-:::

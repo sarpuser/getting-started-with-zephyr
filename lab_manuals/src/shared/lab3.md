@@ -1,7 +1,7 @@
 ---
 title: "Lab 3: Add a Shell and Winc1500 to your project "
 sidebar_label: "Lab 3: Add a Shell and Winc1500 to your project"
-sidebar_position: 4
+sidebar_position: 5
 ---
 
 import Tabs from '@theme/Tabs';

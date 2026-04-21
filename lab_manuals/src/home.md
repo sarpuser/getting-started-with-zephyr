@@ -42,8 +42,7 @@ int b = 2;
 int c = a + b;  // this line is highlighted
 ```
 
-**Green lines** indicate newly added code. Use `// add-next-line` for a single line or
-`// add-start` / `// add-end` for a block.
+**Green lines** indicate newly added code.
 
 ```c
 int a = 1;
@@ -55,9 +54,7 @@ int d = c * 2;
 // add-end
 ```
 
-**Red lines** indicate code that should be deleted. Use `// delete-next-line` for a single line or
-`// delete-start` / `// delete-end` for a block. `// remove-next-line` and `// remove-start` /
-`// remove-end` are aliases that work the same way.
+**Red lines** indicate code that should be deleted.
 
 ```c
 // delete-start
@@ -114,7 +111,7 @@ The following software is required for all labs.
 
 All needed software will be pre-installed for the in-person class. For future reference, the
 completed lab code can be found at:
-[github.com/sarpuser/getting-started-with-zephyt](https://github.com/sarpuser/getting-started-with-zephyt)
+[github.com/sarpuser/getting-started-with-zephyr](https://github.com/sarpuser/getting-started-with-zephyr)
 
 ### Install required software
 

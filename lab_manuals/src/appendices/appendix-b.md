@@ -2,7 +2,7 @@
 title: "Appendix B: Debug your project in VSCode"
 sidebar_label: "Appendix B – VSCode Debug"
 sidebar_position: 2
-slug: /docs/appendices/appendix-b
+slug: appendix-b
 ---
 
 import Tabs from '@theme/Tabs';

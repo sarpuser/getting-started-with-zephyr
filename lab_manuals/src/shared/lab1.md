@@ -1,7 +1,7 @@
 ---
 title: "Lab 1: Build and Deploy a Sample Application"
 sidebar_label: "Lab 1: Build and Deploy a Sample Application"
-sidebar_position: 2
+sidebar_position: 3
 ---
 
 import Tabs from '@theme/Tabs';
@@ -147,6 +147,8 @@ Observe the output and success messages from your build, which may resemble the 
 ![West build success output showing memory region usage](/images/lab1/west_build_output.png)
 :::
 
+---
+
 ### Step 1.2: Flash the sample application to your target device using *west*
 
 #### 1.2.1: To flash your %BOARD_NAME% with the compiled code, connect your %BOARD_NAME% board with your MicroUSB cable connected to the "Debug USB" port of your target, allow your Operating System to find and mount the device, then type:
@@ -162,6 +164,8 @@ The device is now programmed and LED0 should be flashing at a rate of 1Hz.
 #### 1.2.2: Observe the code of the sample application by using the VSCode Navigation pane to expand `zephyr/samples/basic/blinky/src` and opening `main.c` in the main panel. Many of these code elements will be discussed within the remainder of this course.
 
 ![VSCode showing blinky main.c open with file tree expanded](/images/lab1/vscode_main_c.png)
+
+---
 
 ### Step 1.3: Populate a new project tree, then build and deploy your custom project
 

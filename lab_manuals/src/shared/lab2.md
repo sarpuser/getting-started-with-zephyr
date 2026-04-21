@@ -1,7 +1,7 @@
 ---
 title: "Lab 2: Threads and Message Queues"
 sidebar_label: "Lab 2: Threads and Message Queues"
-sidebar_position: 3
+sidebar_position: 4
 ---
 
 import Tabs from '@theme/Tabs';
@@ -185,6 +185,8 @@ changed and recompile as necessary, then flash the resulting compiled code.  If 
 that newly added code doesn’t seem to be running as intended, try a pristine build again.y.
 :::
 
+---
+
 ### Step 2.2: Create a Consumer Thread
 
 #### 2.2.1: In the `application/src/` folder, create a new file called `consumer.c`, adding the following content:
@@ -267,6 +269,8 @@ struct k_thread consumerThread_data;
 ```
 
 ##### 2.2.3.5: Build and flash your code, examining the output in Serial Monitor.  You should see output from both tasks appear in your console.
+
+---
 
 ### Step 2.3: Create a Message Queue
 

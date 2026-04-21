@@ -1,8 +1,8 @@
 ---
-title: "Supplement C: Flashing the WINC1500 Firmware"
-sidebar_label: "Supplement C – WINC1500 Firmware"
+title: "Appendix C: Flashing the WINC1500 Firmware"
+sidebar_label: "Appendix C: – WINC1500 Firmware"
 sidebar_position: 3
-slug: /docs/appendices/supplement-c
+slug: appendix-c
 ---
 
 ## Introduction

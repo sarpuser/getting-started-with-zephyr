@@ -1,0 +1,85 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+/* Microchip brand red as primary */
+:root {
+  --ifm-color-primary: #cc0000;
+  --ifm-color-primary-dark: #b80000;
+  --ifm-color-primary-darker: #ae0000;
+  --ifm-color-primary-darkest: #8f0000;
+  --ifm-color-primary-light: #e00000;
+  --ifm-color-primary-lighter: #ea0000;
+  --ifm-color-primary-lightest: #ff0a0a;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(255, 220, 0, 0.25);
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #ff4444;
+  --ifm-color-primary-dark: #ff2121;
+  --ifm-color-primary-darker: #ff1414;
+  --ifm-color-primary-darkest: #e60000;
+  --ifm-color-primary-light: #ff6767;
+  --ifm-color-primary-lighter: #ff7474;
+  --ifm-color-primary-lightest: #ff9797;
+  --docusaurus-highlighted-code-line-bg: rgba(255, 220, 0, 0.15);
+}
+
+/* ─── Bold magic-comment lines in code blocks ─── */
+/* Usage: add   // bold-next-line   above the line you want bold,
+         or surround a range with   // bold-start  /  // bold-end  */
+.code-block-bold-line {
+  display: block;
+  font-weight: 700;
+}
+
+/* ─── Alternate highlight colours ─── */
+/* green  –  // add-next-line  /  // add-start … // add-end */
+/* High opacity + shifted toward cyan so it reads as clearly distinct
+   from red even under deuteranopia / protanopia simulation. */
+:root {
+  --code-add-line-bg: rgba(0, 200, 100, 0.38);
+}
+[data-theme='dark'] {
+  --code-add-line-bg: rgba(0, 200, 100, 0.30);
+}
+.code-block-add-line {
+  background-color: var(--code-add-line-bg);
+  display: block;
+  margin: 0 calc(-1 * var(--ifm-pre-padding));
+  padding: 0 var(--ifm-pre-padding);
+}
+
+/* red  –  // delete-next-line  /  // delete-start … // delete-end */
+/*         // remove-next-line  /  // remove-start … // remove-end */
+/* Pure, saturated red at higher opacity so the luminosity contrast
+   with the green band is strong enough to be distinguishable. */
+:root {
+  --code-delete-line-bg: rgba(230, 30, 50, 0.30);
+}
+[data-theme='dark'] {
+  --code-delete-line-bg: rgba(230, 30, 50, 0.30);
+}
+.code-block-delete-line {
+  background-color: var(--code-delete-line-bg);
+  display: block;
+  margin: 0 calc(-1 * var(--ifm-pre-padding));
+  padding: 0 var(--ifm-pre-padding);
+}
+
+/* ─── Shell session prompt styling ─── */
+/* The "bash-session" language uses this alias for the prompt prefix.
+   The prompt is shown in a muted colour and excluded from text selection
+   so that triple-click / drag selects only the command text.
+   The copy button already strips prompts programmatically. */
+.token.shell-prompt {
+  user-select: none;
+  color: #888;
+}
+
+[data-theme='dark'] .token.shell-prompt {
+  color: #666;
+}

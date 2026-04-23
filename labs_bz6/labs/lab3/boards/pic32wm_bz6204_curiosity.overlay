@@ -1,0 +1,54 @@
+/*
+ * PIC32WM-BZ6 Curiosity board overlay for Lab 3
+ *
+ * WINC1500 Wi-Fi module connected to XPRO header (J900 / EXT1).
+ *
+ * XPRO pin → BZ6 module pin mapping:
+ *   Pin  3  WAKE      → RPD4  (portd 4)
+ *   Pin  4  RSTN      → RPB15 (portb 15)
+ *   Pin  6  CHIP_EN   → RPD2  (portd 2)
+ *   Pin  9  IRQN      → RPB0  (portb 0)
+ *   Pin 15  SPI_CS    → RPB1  (portb 1)
+ *   Pin 16  SPI_MOSI  → RPB3  (portb 3, SERCOM4 PAD3)
+ *   Pin 17  SPI_MISO  → RPA4  (porta 4, SERCOM4 PAD0)
+ *   Pin 18  SPI_SCK   → RPE5  (porte 5, SERCOM4 PAD1)
+ */
+
+/ {
+	aliases {
+	};
+};
+
+/*
+ * SERCOM4 as SPI master – XPRO header (J900)
+ *
+ * dipo = 0  → MISO on PAD[0] = RPA4
+ * dopo = 2  → SCK  on PAD[1] = RPE5
+ *             MOSI on PAD[3] = RPB3
+ *
+ * CS is driven in software via cs-gpios (RPB1, XPRO pin 15).
+ */
+&sercom4 {
+	compatible = "microchip,sercom-g1-spi";
+	dipo = <0>;
+	dopo = <2>;
+	#address-cells = <1>;
+	#size-cells = <0>;
+	cs-gpios = <&portb 1 GPIO_ACTIVE_LOW>;       /* XPRO pin 15 – RPB1  */
+	pinctrl-0 = <&sercom4_spi_xpro>;
+	pinctrl-names = "default";
+	dmas = <&dmac 4 12>, <&dmac 5 13>;
+	dma-names = "rx", "tx";
+	status = "okay";
+
+	sercom4_cs0_winc1500: WINC1500@0 {
+		compatible = "atmel,winc1500";
+		reg = <0>;
+		spi-max-frequency = <12000000>;
+		irq-gpios    = <&portb 0  GPIO_ACTIVE_LOW>;  /* XPRO pin  9 – RPB0  */
+		reset-gpios  = <&portb 15 GPIO_ACTIVE_LOW>;  /* XPRO pin  4 – RPB15 */
+		enable-gpios = <&portd 2  GPIO_ACTIVE_HIGH>,  /* XPRO pin  6 – RPD2  CHIP_EN */
+		               <&portd 4  GPIO_ACTIVE_HIGH>;  /* XPRO pin  3 – RPD4  WAKE    */
+		status = "okay";
+	};
+};

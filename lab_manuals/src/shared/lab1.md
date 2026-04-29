@@ -153,9 +153,29 @@ Observe the output and success messages from your build, which may resemble the 
 
 #### 1.2.1: To flash your %BOARD_NAME% with the compiled code, connect your %BOARD_NAME% board with your MicroUSB cable connected to the "Debug USB" port of your target, allow your Operating System to find and mount the device, then type:
 
-```bash-session
-(.venv) $ west flash
-```
+<Tabs groupId="os">
+  <TabItem value="linux" label="Ubuntu">
+
+  ```bash-session
+  (.venv) $ west flash %FLASH_ARGS_LINUX%
+  ```
+
+  </TabItem>
+  <TabItem value="macos" label="macOS">
+
+  ```bash-session
+  (.venv) $ west flash %FLASH_ARGS_MACOS%
+  ```
+
+  </TabItem>
+  <TabItem value="windows" label="Windows">
+
+  ```ps-session
+  (.venv) PS C:\...\zephyrproject> west flash %FLASH_ARGS_WIN%
+  ```
+
+  </TabItem>
+</Tabs>
 
 :::info
 The device is now programmed and LED0 should be flashing at a rate of 1Hz.
@@ -186,7 +206,7 @@ You can also use your terminal window and run the following commands:
   <TabItem value="macos" label="macOS">
 
   ```bash-session
-  (.venv) $ cp -r zephyr/samples/blinky/
+  (.venv) $ cp -r zephyr/samples/blinky application
   ```
 
   </TabItem>
@@ -271,21 +291,21 @@ code doesn't seem to be running as intended, try a pristine build again.
   <TabItem value="linux" label="Ubuntu">
 
   ```bash-session
-  (.venv) $ west flash
+  (.venv) $ west flash %FLASH_ARGS_LINUX%
   ```
 
   </TabItem>
   <TabItem value="macos" label="macOS">
 
   ```bash-session
-  (.venv) $ west flash
+  (.venv) $ west flash %FLASH_ARGS_MACOS%
   ```
 
   </TabItem>
   <TabItem value="windows" label="Windows">
 
   ```ps-session
-  (.venv) PS C:\...\zephyrproject> west flash
+  (.venv) PS C:\...\zephyrproject> west flash %FLASH_ARGS_WIN%
   ```
 
   </TabItem>

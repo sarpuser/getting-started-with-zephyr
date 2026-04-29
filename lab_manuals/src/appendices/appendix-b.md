@@ -26,14 +26,14 @@ Debugging is an important tool for embedded development. Zephyr and VSCode offer
 <TabItem value="linux" label="Ubuntu">
 
 ```bash-session
-(.venv) $ cd ~/mastersproject && west debug
+(.venv) $ cd ~/zephyrproject && west debug
 ```
 
 </TabItem>
 <TabItem value="macos" label="macOS">
 
 ```bash-session
-(.venv) $ cd ~/mastersproject && west debug
+(.venv) $ cd ~/zephyrproject && west debug
 ```
 
 </TabItem>

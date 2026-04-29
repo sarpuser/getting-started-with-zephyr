@@ -56,7 +56,6 @@ void producerThread(void *inLed, void*, void*) {
     while (1) {
         gpio_pin_toggle_dt(toggleLED);
         led_state = !led_state;
-        printf("(producer) LED state: %s\n", led_state ? "ON" : "OFF");
         k_msleep(SLEEP_TIME_MS);
     }
 }
@@ -200,7 +199,7 @@ void consumerThread(void*, void*, void*){
 
     while (1) {
         k_msleep(1000); // 'Magic Number' OK – We'll replace shortly
-        printf("(consumer) Data: %d\n", data);
+        printk("(consumer) Data: %d\n", data);
         data++;
     }
 }
@@ -320,9 +319,10 @@ void producerThread(void *inLed, void* inMsgQueue, void*) {
 #### 2.3.5: In `producer.c`, add the following block of code within the `while(1){}` loop to periodically place  data into the message queue:
 
 ```c
-    printf("LED state: %s\n", led_state ? "ON" : "OFF");
+    led_state = !led_state;
     // add-start
     if(counter++>=10) {
+        printk("(producer) Putting %d into message queue\n", data);
         k_msgq_put(notifyMsgQueue, &data, K_NO_WAIT);
         data++;
         counter = 0;
@@ -351,16 +351,16 @@ producer_tid = k_thread_create(&producerThread_data,
 
 #### 2.3.7: Similarly, update `consumer.c/h`:
 
-##### 2.3.7.1:  Accept `(void*)inMsgQueue` as its first argument for `consumerThread()` prototype:
+##### 2.3.7.1:  Accept `(void*)inMsgQueue` as its second argument for `consumerThread()` prototype:
 
 ```c {1}
-void consumerThread(void* inMsgQueue, void*, void*)
+void consumerThread(void*, void* inMsgQueue, void*)
 ```
 
 ##### 2.3.7.2: In `consumer.c` cast the incoming `(void*) inMsgQueue` pointer for use within the `consumerThread` function
 
 ```c
-void consumerThread(void* inMsgQueue, void*, void*) {
+void consumerThread(void*, void* inMsgQueue, void*) {
     // highlight-next-line
     struct k_msgq *notifyMsgQueue = (struct k_msgq*)inMsgQueue;
     uint32_t data = 0;
@@ -377,7 +377,7 @@ void consumerThread(void* inMsgQueue, void*, void*) {
         k_msleep(1000);
         // add-next-line
         k_msgq_get(notifyMsgQueue, &data, K_FOREVER);
-        printf("(consumer) Received data: %d\n", data);
+        printk("(consumer) Received data: %d\n", data);
     }
 ```
 
@@ -392,14 +392,14 @@ error if the timer expires without a new queue entry showing up as expected.
 ```c
     while (1) {
         k_msgq_put(notifyMsgQueue, &data, K_NO_WAIT);
-        printf("(consumer) Data: %d\n", data);
+        printk("(consumer) Data: %d\n", data);
         // delete-next-line
         data++;
     }
 }
 ```
 
-##### 2.3.7.5: In `main.c` update your `k_thread_create()` call to take your `&consumerQueue` pointer as it’s first `(void*)` argument to match your updated `consumerThread()` prototype
+##### 2.3.7.5: In `main.c` update your `k_thread_create()` call to take your `&consumerQueue` pointer as its second `(void*)` argument to match your updated `consumerThread()` prototype
 
 ```c
 consumer_tid = k_thread_create(&consumerThread_data,
@@ -407,7 +407,7 @@ consumer_tid = k_thread_create(&consumerThread_data,
                 K_THREAD_STACK_SIZEOF(consumerThreadstack_area),
                 consumerThread,
                 // highlight-next-line
-                (void*)&consumerQueue, (void*)NULL, (void*)NULL,
+                (void*)NULL, (void*)&consumerQueue, (void*)NULL,
                 PRIORITY, 0, K_NO_WAIT);
 ```
 

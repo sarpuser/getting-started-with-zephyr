@@ -8,6 +8,8 @@ slug: appendix-b
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
+# Appendix B: Debug your project in VSCode
+
 ## Purpose
 
 Explore options for debugging a target within a compiled application.

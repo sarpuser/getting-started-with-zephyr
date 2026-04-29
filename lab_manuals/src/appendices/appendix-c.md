@@ -5,6 +5,8 @@ sidebar_position: 3
 slug: appendix-c
 ---
 
+# Appendix C: Flashing the WINC1500 Firmware
+
 ## Introduction
 
 Just as in MPLABX/Harmony applications, it is important for the firmware version on the WINC1500 and the driver version in software to be in sync. In Zephyr, the driver version used is based on version **19.5.2**, so the WINC1500 firmware version should match.

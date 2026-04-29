@@ -36,10 +36,11 @@ Code blocks use the following conventions to mark changes and important lines:
 
 **Highlighted lines** (yellow background) indicate lines that have been modified.
 
-```c {3}
+```c
 int a = 1;
 int b = 2;
-int c = a + b;  // this line is highlighted
+// highlight-next-line
+int c = a + b;
 ```
 
 **Green lines** indicate newly added code.
@@ -57,15 +58,14 @@ int d = c * 2;
 **Red lines** indicate code that should be deleted.
 
 ```c
-// delete-start
+// remove-start
 int a = 1;
 int b = a / 0;
-// delete-end
+// remove-end
 int c = a + 1;
 ```
 
-**Bold lines** indicate a line of particular importance. Use `// bold-next-line` for a single line or
-`// bold-start` / `// bold-end` for a block.
+**Bold lines** indicate a line of particular importance.
 
 ```c
 int a = 1;
@@ -116,13 +116,3 @@ completed lab code can be found at:
 ### Install required software
 
 See [Appendix A: Host PC Setup Guide](/appendices/appendix-a)
-
-## Navigation
-
-Use the **top navbar** to select your board and navigate the labs:
-
-| Tab | Contents |
-|-----|----------|
-| **SAME54** | Labs 1–3 for the SAM E54 Xplained Pro |
-| **PIC32BZ6** | Labs 1–3 for the PIC32BZ6 board |
-| **Appendices** | Host setup guide, VSCode debugging, WINC1500 firmware update |

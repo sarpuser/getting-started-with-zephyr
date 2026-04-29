@@ -8,6 +8,8 @@ slug: appendix-a
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
+# Appendix A: Host PC Setup Guide
+
 ZephyrOS can be installed and used on most recent builds of Windows, macOS, and Linux. In order to re-create this lab on your own host PC, install the required dependencies as follows.
 
 ## Step 1: Follow the Zephyr Getting Started Guide

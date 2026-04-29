@@ -1,0 +1,15 @@
+{
+  "name": "pdf-gen",
+  "version": "1.0.0",
+  "description": "Generate board/OS-specific PDFs from Zephyr lab manual sources",
+  "type": "module",
+  "scripts": {
+    "generate": "node generate.mjs"
+  },
+  "dependencies": {
+    "highlight.js": "^11.9.0",
+    "marked": "^4.0.0",
+    "md-to-pdf": "^5.2.4",
+    "puppeteer": "^24.0.0"
+  }
+}

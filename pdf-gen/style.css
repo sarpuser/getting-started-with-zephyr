@@ -1,0 +1,305 @@
+/* ============================================================
+   Zephyr Lab Manual — PDF Stylesheet
+   ============================================================ */
+
+@page {
+  size: A4;
+  margin: 18mm 18mm;
+}
+
+/* ── Cover page ───────────────────────────────────────────── */
+.cover-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  min-height: 240mm;
+}
+
+.cover-label {
+  font-size: 11pt;
+  color: #888;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 24pt;
+}
+
+.cover-title {
+  font-size: 30pt;
+  font-weight: 700;
+  color: #b5121b;
+  border: none !important;
+  line-height: 1.3;
+  margin: 0 0 24pt 0;
+}
+
+.cover-board {
+  font-size: 14pt;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 6pt 0;
+}
+
+.cover-os {
+  font-size: 12pt;
+  color: #666;
+  margin: 0;
+}
+
+/* ── Table of Contents ────────────────────────────────────── */
+.toc {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.toc-h1 {
+  padding: 2pt 0;
+}
+
+.toc-row {
+  display: flex;
+  align-items: baseline;
+  text-decoration: none;
+  color: #1a1a1a;
+  font-size: 10pt;
+  font-weight: 700;
+}
+
+.toc-text {
+  flex-shrink: 0;
+  padding-right: 4pt;
+}
+
+.toc-dots {
+  flex: 1;
+  border-bottom: 1px dotted #888;
+  position: relative;
+  top: -2.5pt;
+  min-width: 20pt;
+}
+
+.toc-page {
+  flex-shrink: 0;
+  padding-left: 4pt;
+}
+
+/* ── Body ─────────────────────────────────────────────────── */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  font-size: 10pt;
+  line-height: 1.6;
+  color: #1a1a1a;
+}
+
+/* ── Headings ─────────────────────────────────────────────── */
+h1 {
+  font-size: 20pt;
+  color: #b5121b; /* Microchip red */
+  border-bottom: 2px solid #b5121b;
+  padding-bottom: 5pt;
+  margin-top: 0;
+  /* NOTE: no page-break-before here — the --- separator between sections
+     handles page breaks. Adding it here creates empty pages because the
+     separator hr already fires page-break-after:always. */
+}
+
+h2 {
+  font-size: 13pt;
+  color: #222;
+  border-bottom: 1px solid #d0d7de;
+  padding-bottom: 3pt;
+  margin-top: 20pt;
+}
+
+h3 {
+  font-size: 11pt;
+  color: #333;
+  margin-top: 16pt;
+}
+
+h4 {
+  font-size: 10pt;
+  font-weight: 700;
+  color: #444;
+  margin-top: 12pt;
+}
+
+/* Prevent orphaned headings — keep at least the first line of content
+   on the same page as its heading */
+h1, h2, h3, h4 {
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+/* ── Code ─────────────────────────────────────────────────── */
+/* Keep a paragraph that immediately precedes a code block on the same page */
+p + pre,
+p + div > pre {
+  break-before: avoid;
+  page-break-before: avoid;
+}
+
+pre {
+  background: #f6f8fa;
+  border: 1px solid #d0d7de;
+  border-left: 4px solid #b5121b;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 8pt;
+  white-space: pre-wrap;
+  word-break: break-word;
+  /* Never split a code block across a page */
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+code {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 8pt;
+}
+
+/* Inline code */
+:not(pre) > code {
+  background: #f0f2f5;
+  border: 1px solid #d0d7de;
+  border-radius: 3px;
+  padding: 1px 4px;
+  font-size: 8.5pt;
+}
+
+/* ── Tables ───────────────────────────────────────────────── */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 12pt 0;
+  font-size: 9pt;
+}
+
+th, td {
+  border: 1px solid #d0d7de;
+  padding: 5px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  background: #f6f8fa;
+  font-weight: 600;
+}
+
+tr:nth-child(even) {
+  background: #fafbfc;
+}
+
+/* ── Images ───────────────────────────────────────────────── */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 12pt auto;
+  border: 1px solid #d0d7de;
+  border-radius: 4px;
+}
+
+/* ── Admonitions (HTML divs from admonitions.mjs) ─────────── */
+.admonition {
+  border-left: 4px solid;
+  border-radius: 0 4px 4px 0;
+  margin: 12pt 0;
+  padding: 8pt 12pt;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.admonition-title {
+  font-weight: 700;
+  font-size: 9.5pt;
+  margin: 0 0 5pt 0;
+}
+
+.admonition p {
+  margin: 4pt 0;
+  font-size: 9.5pt;
+}
+
+.admonition-info    { border-color: #0078d4; background: #f0f7ff; }
+.admonition-note    { border-color: #6c757d; background: #f8f9fa; }
+.admonition-tip     { border-color: #2e7d32; background: #f0fff4; }
+.admonition-warning { border-color: #e65100; background: #fff8f0; }
+.admonition-caution { border-color: #e65100; background: #fff8f0; }
+.admonition-danger  { border-color: #c62828; background: #fff0f0; }
+
+/* Fallback for plain markdown blockquotes */
+blockquote {
+  border-left: 4px solid #0078d4;
+  margin: 12pt 0;
+  padding: 6pt 12pt;
+  background: #f0f7ff;
+  color: #1a1a1a;
+  border-radius: 0 4px 4px 0;
+}
+
+blockquote p { margin: 4pt 0; }
+
+/* ── HR → page break between sections ────────────────────── */
+hr {
+  border: none;
+  page-break-after: always;
+  margin: 0;
+  height: 0;
+}
+
+/* ── Code line annotations ────────────────────────────────── */
+/* Each line in an annotated block is wrapped in a <span class="code-line">.
+   display:block + negative margin/padding extends the bg across the full
+   width of the <pre> including its 12px horizontal padding. */
+.code-line {
+  display: block;
+  margin: 0 -12px;
+  padding: 0 12px;
+}
+
+.hl-add       { background-color: rgba(  0, 200, 100, 0.38) !important; }
+.hl-highlight { background-color: rgba(255, 220,   0, 0.45) !important; }
+.hl-remove    { background-color: rgba(230,  30,  50, 0.30) !important; }
+.hl-bold      { font-weight: 700 !important; }
+.hl-bold *    { font-weight: 700 !important; }
+
+/* ── Details / Summary ────────────────────────────────────── */
+details > *:not(summary) {
+  display: block !important;
+}
+
+details {
+  border: 1px solid #d0d7de;
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin: 10pt 0;
+  background: #fafbfc;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+details summary {
+  font-weight: 600;
+  font-size: 9.5pt;
+  cursor: default;
+  margin-bottom: 6pt;
+  color: #333;
+}
+
+/* ── Misc ─────────────────────────────────────────────────── */
+p { margin: 7pt 0; }
+
+ul, ol {
+  margin: 7pt 0;
+  padding-left: 20pt;
+}
+
+li { margin: 3pt 0; }
+
+a { color: #0078d4; }
+
+strong { font-weight: 600; }

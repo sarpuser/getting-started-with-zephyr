@@ -13,9 +13,9 @@
 **/.claude
 **/.venv
 **/*cache*
+**/node_modules
 presentation/
 
 # Docusaurus
-gh_pages/node_modules/
 gh_pages/build/
 gh_pages/.docusaurus/

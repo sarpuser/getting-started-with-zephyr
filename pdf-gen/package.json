@@ -8,9 +8,8 @@
     "install-skip-chrome": "PUPPETEER_SKIP_DOWNLOAD=true npm install"
   },
   "dependencies": {
-    "highlight.js": "^11.9.0",
     "pagedjs-cli": "^0.4.3",
-    "rehype-highlight": "^7.0.0",
+    "rehype-prism-plus": "^2.0.0",
     "rehype-stringify": "^10.0.0",
     "remark-directive": "^3.0.0",
     "remark-frontmatter": "^5.0.0",

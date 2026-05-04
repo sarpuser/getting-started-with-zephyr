@@ -4,13 +4,11 @@
  * Remark plugin that visits `code` AST nodes and processes Docusaurus magic
  * comment directives (add-next-line, highlight-start/end, etc.).
  *
- * For blocks WITH annotations: converts the node to a raw `html` node
- * containing syntax-highlighted HTML with per-line <span> wrappers.
- * highlight.js is used directly so we control per-line rendering.
- *
- * For blocks WITHOUT annotations: updates node.value (deletes hidden lines,
- * applies the language name mapping) and leaves the node as a `code` node
- * for rehype-highlight to handle.
+ * Magic comment lines are stripped from node.value. For annotated blocks,
+ * the per-line annotation array is stored as a hProperty (key: ANNOTATIONS_PROP)
+ * so that rehypeAnnotateLines can apply per-line class
+ * names after rehype-prism-plus wraps each line in <span class="code-line">.
+ * The node stays as a `code` node in both cases.
  *
  * Annotation mapping:
  *   add-next-line / add-start/end           → green background (.hl-add)
@@ -20,10 +18,15 @@
  *   delete-next-line / delete-start/end     → line hidden entirely
  */
 
-import hljs from 'highlight.js';
 import { visit } from 'unist-util-visit';
 
-// Map Docusaurus/custom language names → highlight.js language names
+// Shared key used to pass annotation data from this remark plugin through
+// mdast-util-to-hast hProperties and into the rehypeAnnotateLines rehype plugin.
+// mdast-util-to-hast spreads hProperties via Object.assign (no normalisation),
+// so the key must be identical in both places — this export enforces that.
+export const ANNOTATIONS_PROP = 'dataAnnotations';
+
+// Map Docusaurus/custom language names → Prism language names
 const LANG_MAP = {
   'dts': 'c',
 };
@@ -73,97 +76,18 @@ export function remarkMagicComments() {
         }
       }
 
+      // Strip magic comment lines and update the code value
+      node.value = codeLines.join('\n');
+      // Normalize language name (e.g. 'dts' → 'c' for Prism)
+      if (LANG_MAP[rawLang]) node.lang = lang;
+
       if (hasAnnotations) {
-        // Annotated blocks: raw HTML with hljs highlighting + per-line spans
-        node.type = 'html';
-        node.value = renderAnnotatedBlock(lang, codeLines, annotations);
-        delete node.lang;
-        delete node.meta;
-      } else {
-        // Plain block: update value (delete lines stripped) and normalize lang
-        node.value = codeLines.join('\n');
-        if (LANG_MAP[rawLang]) node.lang = lang;
+        // Store annotation array as a hast property so rehypeAnnotateLines
+        // can apply per-line classes after rehype-prism-plus highlights the block.
+        node.data = node.data ?? {};
+        node.data.hProperties = node.data.hProperties ?? {};
+        node.data.hProperties[ANNOTATIONS_PROP] = JSON.stringify(annotations);
       }
     });
   };
-}
-
-// ---------------------------------------------------------------------------
-// Render an annotated block as syntax-highlighted HTML with coloured lines
-// ---------------------------------------------------------------------------
-
-function escapeHtml(str) {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
-/**
- * Split hljs-highlighted HTML at newlines, properly closing and reopening
- * any <span> tags that span across line boundaries. This prevents double-
- * background stacking when a multi-line hljs token (e.g. a C block comment)
- * overlaps with per-line annotation spans.
- */
-function splitHlLines(html) {
-  const result = [];
-  let line = '';
-  const openTags = []; // stack of opening <span ...> strings currently open
-  let i = 0;
-
-  while (i < html.length) {
-    if (html[i] === '<') {
-      const tagEnd = html.indexOf('>', i);
-      const tag = html.slice(i, tagEnd + 1);
-      i = tagEnd + 1;
-
-      if (tag.startsWith('</span')) {
-        openTags.pop();
-      } else if (tag.startsWith('<span')) {
-        openTags.push(tag);
-      }
-      line += tag;
-    } else if (html[i] === '\n') {
-      // Close all currently open spans before ending the line
-      for (let j = openTags.length - 1; j >= 0; j--) {
-        line += '</span>';
-      }
-      result.push(line);
-      // Reopen those spans at the start of the next line
-      line = openTags.join('');
-      i++;
-    } else {
-      line += html[i];
-      i++;
-    }
-  }
-
-  if (line) result.push(line);
-  return result;
-}
-
-function renderAnnotatedBlock(lang, lines, annotations) {
-  const code = lines.join('\n');
-
-  let highlighted;
-  try {
-    if (lang && hljs.getLanguage(lang)) {
-      highlighted = hljs.highlight(code, { language: lang }).value;
-    } else {
-      highlighted = escapeHtml(code);
-    }
-  } catch {
-    highlighted = escapeHtml(code);
-  }
-
-  const htmlLines = splitHlLines(highlighted);
-  const wrapped = htmlLines.map((htmlLine, i) => {
-    const ann = annotations[i] ?? null;
-    const cls = ann ? ` hl-${ann}` : '';
-    return `<span class="code-line${cls}">${htmlLine}</span>`;
-  });
-
-  const langClass = lang ? ` language-${lang}` : '';
-  return `<pre><code class="hljs${langClass}">${wrapped.join('')}</code></pre>\n`;
 }

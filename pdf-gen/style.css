@@ -281,9 +281,9 @@ hr {
 }
 
 /* ── Shell session prompt styling ─────────────────────────── */
-/* highlight.js emits class="hljs-meta prompt_" for the prompt span.
-   Mute it so the command stands out, matching the Docusaurus website. */
-.hljs-meta.prompt_ {
+/* rehype-prism-plus emits <span class="token prompt"> for our custom
+   bash-session / ps-session languages. Mute it so the command stands out. */
+.token.prompt {
   opacity: 0.45;
 }
 

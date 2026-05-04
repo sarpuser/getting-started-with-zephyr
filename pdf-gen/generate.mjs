@@ -19,7 +19,7 @@
  *      remarkAdmonitions → remarkMagicComments → remarkCleanupMdx →
  *      remarkCollectH1s (adds id attrs + collects headings for TOC)
  *   4. remark-rehype (mdast → hast)
- *   5. Rehype transforms: rehypeEmbedImages → rehype-highlight
+ *   5. Rehype transforms: rehypeEmbedImages → rehype-prism-plus → rehypeAnnotateLines
  *   6. rehype-stringify → HTML string
  *   7. Sections joined with <hr> (CSS page-break-after: always)
  *   8. Cover page + TOC (using CSS target-counter for page numbers) prepended
@@ -40,7 +40,7 @@ import remarkGfm from 'remark-gfm';
 import remarkFrontmatter from 'remark-frontmatter';
 import remarkDirective from 'remark-directive';
 import remarkRehype from 'remark-rehype';
-import rehypeHighlight from 'rehype-highlight';
+import rehypePrism from 'rehype-prism-plus';
 import rehypeStringify from 'rehype-stringify';
 import { VFile } from 'vfile';
 import { visit } from 'unist-util-visit';
@@ -51,6 +51,8 @@ import { remarkBoardVars, boardMap } from './plugins/boardVars.mjs';
 import { remarkAdmonitions } from './plugins/admonitions.mjs';
 import { remarkMagicComments } from './plugins/stripMagicComments.mjs';
 import { remarkCleanupMdx } from './plugins/cleanupMdx.mjs';
+import { rehypeShellPrompts } from './plugins/rehypeShellPrompts.mjs';
+import { rehypeAnnotateLines } from './plugins/rehypeAnnotateLines.mjs';
 
 const execFileAsync = promisify(execFile);
 
@@ -120,35 +122,6 @@ function normalizeAdmonitionTitles(text) {
   return text.replace(/^:::([\w]+)(?:\s+(.+))?$/gm, (match, type, title) =>
     title ? `:::${type}{title="${title}"}` : match
   );
-}
-
-// ---------------------------------------------------------------------------
-// Custom highlight.js language definitions for shell sessions
-// ---------------------------------------------------------------------------
-
-// bash-session: matches any prompt ending in $ or # (covers "$ ", "(.venv) $ ",
-// "uart:~$ ", "root# ", etc.) then highlights the rest as bash
-function bashSession(hljs) {
-  return {
-    name: 'Bash Session',
-    contains: [{
-      className: 'meta.prompt',
-      begin: /^.*?[$#]\s?/,
-      starts: { end: /[^\\](?=\s*$)/, subLanguage: 'bash' },
-    }],
-  };
-}
-
-// ps-session: matches optional venv prefix + "PS path> " then highlights as powershell
-function psSession(hljs) {
-  return {
-    name: 'PowerShell Session',
-    contains: [{
-      className: 'meta.prompt',
-      begin: /^(?:.*\s+)?PS\s[^>]+>\s?/,
-      starts: { end: /[^\\](?=\s*$)/, subLanguage: 'powershell' },
-    }],
-  };
 }
 
 // ---------------------------------------------------------------------------
@@ -253,10 +226,9 @@ function processSourceFile(filePath, board, targetOs) {
     .use(remarkCollectH1s, { headingsArr })
     .use(remarkRehype, { allowDangerousHtml: true })
     .use(rehypeEmbedImages)
-    .use(rehypeHighlight, {
-      ignoreMissing: true,
-      languages: { 'bash-session': bashSession, 'ps-session': psSession },
-    })
+    .use(rehypePrism, { ignoreMissing: true })
+    .use(rehypeShellPrompts)
+    .use(rehypeAnnotateLines)
     .use(rehypeStringify, { allowDangerousHtml: true })
     .processSync(file);
 

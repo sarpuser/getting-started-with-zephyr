@@ -288,14 +288,14 @@ const CHROME_PATH =
   '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 
 async function renderPdf(htmlPath, outputPath) {
-  await execFileAsync(
-    PAGEDJS_BIN,
-    ['--inputs', htmlPath, '--output', outputPath, '--timeout', '120000'],
-    {
-      cwd: __dirname,
-      env: { ...process.env, PUPPETEER_EXECUTABLE_PATH: CHROME_PATH },
-    }
-  );
+  const args = ['--inputs', htmlPath, '--output', outputPath, '--timeout', '120000'];
+  if (process.env.CI) {
+    args.push('--browserArgs', '--no-sandbox,--disable-setuid-sandbox');
+  }
+  await execFileAsync(PAGEDJS_BIN, args, {
+    cwd: __dirname,
+    env: { ...process.env, PUPPETEER_EXECUTABLE_PATH: CHROME_PATH },
+  });
 }
 
 // ---------------------------------------------------------------------------

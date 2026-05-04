@@ -1,41 +1,44 @@
-# Website
+# Docusaurus Site (gh_pages)
 
-This website is built using [Docusaurus](https://docusaurus.io/), a modern static website generator.
+The Docusaurus site that serves the lab manuals online. Reads content from `lab_manuals/src/` directly — no content duplication.
 
-## Installation
+Live site: [sarpuser.github.io/getting-started-with-zephyr](https://sarpuser.github.io/getting-started-with-zephyr/)
 
-```bash
-yarn
-```
-
-## Local Development
+## Setup
 
 ```bash
-yarn start
+cd gh_pages
+pnpm install
 ```
 
-This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
-
-## Build
+## Development
 
 ```bash
-yarn build
+pnpm start     # dev server with hot reload at localhost:3000
+pnpm build     # production build → build/
+pnpm serve     # serve the built site locally
 ```
-
-This command generates static content into the `build` directory and can be served using any static contents hosting service.
 
 ## Deployment
 
-Using SSH:
+Deployed to GitHub Pages via the `gh-pages` branch. CI handles this automatically on push to `main`. To deploy manually:
 
 ```bash
-USE_SSH=true yarn deploy
+pnpm deploy
 ```
 
-Not using SSH:
+## Key Configuration Files
 
-```bash
-GIT_USER=<Your GitHub username> yarn deploy
-```
+| File | Purpose |
+|------|---------|
+| `docusaurus.config.js` | Site config, navbar items, board sidebars, plugins |
+| `sidebars.js` | Sidebar structure (auto-generated from `lab_manuals/src/<board>/`) |
+| `plugins/remarkBoardVars.mjs` | Replaces `%VAR%` tokens based on the file's board directory |
 
-If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
+## How Board Routing Works
+
+Docusaurus serves content from `lab_manuals/src/` with `shared/` excluded. Each board directory (`same54/`, `pic32bz6/`) becomes its own sidebar section. The `remarkBoardVars` plugin detects which board a file belongs to from its file path and substitutes board-specific variables.
+
+## Adding a New Board
+
+See [`ADDING_BOARDS.md`](../ADDING_BOARDS.md) for the full checklist.

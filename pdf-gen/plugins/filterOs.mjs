@@ -1,75 +1,40 @@
 /**
  * filterOs.mjs
  *
- * Processes <Tabs groupId="os"><TabItem value="..."> blocks in MDX source,
- * keeping only the content for the requested OS and discarding the others.
+ * Remark plugin that filters <Tabs>/<TabItem> JSX blocks, keeping only the
+ * content for the requested OS and discarding all others.
  *
- * Uses a line-by-line state machine to handle nested content (code blocks,
- * images, etc.) inside each TabItem without needing a full JSX parser.
+ * Visits mdxJsxFlowElement nodes named 'Tabs', finds the child TabItem whose
+ * `value` attribute matches the target OS, and replaces the whole <Tabs> node
+ * with that TabItem's children (already parsed as remark AST nodes).
  */
 
-export function filterOs(text, os) {
-  const lines = text.split('\n');
-  const result = [];
+import { visit, SKIP } from 'unist-util-visit';
 
-  // States: 'outside' | 'in_tabs' | 'capturing' | 'skipping'
-  let state = 'outside';
-  let captureBuffer = [];
-  let captureIndent = 0;
+export function remarkFilterOs({ os }) {
+  return (tree) => {
+    visit(tree, 'mdxJsxFlowElement', (node, index, parent) => {
+      if (node.name !== 'Tabs' || !parent) return;
 
-  for (const line of lines) {
-    const trimmed = line.trim();
+      // Find the TabItem whose value attribute matches the target OS
+      const tabItem = node.children.find(
+        (child) =>
+          child.type === 'mdxJsxFlowElement' &&
+          child.name === 'TabItem' &&
+          child.attributes?.some(
+            (a) => a.name === 'value' && a.value === os
+          )
+      );
 
-    if (state === 'outside') {
-      if (/^<Tabs(\s[^>]*)?>/.test(trimmed)) {
-        state = 'in_tabs';
-        captureBuffer = [];
+      if (tabItem && tabItem.children.length > 0) {
+        // Replace the entire <Tabs> block with the matching TabItem's children
+        parent.children.splice(index, 1, ...tabItem.children);
+        return [SKIP, index + tabItem.children.length];
       } else {
-        result.push(line);
+        // No matching TabItem — remove the entire <Tabs> block
+        parent.children.splice(index, 1);
+        return [SKIP, index];
       }
-    } else if (state === 'in_tabs') {
-      if (/^<\/Tabs>/.test(trimmed)) {
-        // Emit captured content, trimming leading/trailing blank lines
-        result.push(...trimBlankLines(captureBuffer));
-        state = 'outside';
-        captureBuffer = [];
-      } else if (new RegExp(`<TabItem[^>]*\\bvalue="${os}"[^>]*>`).test(trimmed)) {
-        // Detect how many spaces this <TabItem> line is indented
-        captureIndent = line.match(/^(\s*)/)[1].length;
-        state = 'capturing';
-        captureBuffer = [];
-      } else if (/<TabItem[^>]*>/.test(trimmed)) {
-        state = 'skipping';
-      }
-      // Other content inside <Tabs> but outside a <TabItem> is ignored
-    } else if (state === 'capturing') {
-      if (/^<\/TabItem>/.test(trimmed)) {
-        state = 'in_tabs';
-        // captureBuffer accumulates across multiple TabItem closings
-        // (only one is ever kept, so no merging needed)
-      } else {
-        // Strip the TabItem's own indentation level from each captured line
-        const stripped =
-          line.length >= captureIndent && line.startsWith(' '.repeat(captureIndent))
-            ? line.slice(captureIndent)
-            : line;
-        captureBuffer.push(stripped);
-      }
-    } else if (state === 'skipping') {
-      if (/^<\/TabItem>/.test(trimmed)) {
-        state = 'in_tabs';
-      }
-      // Discard all other lines
-    }
-  }
-
-  return result.join('\n');
-}
-
-function trimBlankLines(lines) {
-  let start = 0;
-  let end = lines.length - 1;
-  while (start <= end && lines[start].trim() === '') start++;
-  while (end >= start && lines[end].trim() === '') end--;
-  return lines.slice(start, end + 1);
+    });
+  };
 }

@@ -1,23 +1,23 @@
 /**
  * admonitions.mjs
  *
- * Converts Docusaurus admonition syntax into styled HTML <div> blocks so that
- * different admonition types can be coloured independently in the PDF.
+ * Remark plugin that converts containerDirective nodes (from remark-directive)
+ * into styled HTML <div> blocks for PDF output.
  *
- * Input:
+ * Requires remark-directive to run first during parsing.
+ *
+ * Because the source files use Docusaurus-style admonition titles like:
  *   :::warning Some title
- *   Content with **bold** and `inline code`.
+ * (plain text after the type name), generate.mjs pre-processes the raw source
+ * to convert that to remark-directive's attribute syntax:
+ *   :::warning{title="Some title"}
+ * before parsing.
  *
- *   Second paragraph.
- *   :::
- *
- * Output (raw HTML passed through md-to-pdf / marked):
- *   <div class="admonition admonition-warning">
- *   <p class="admonition-title">⚠ Warning</p>
- *   <p>Content with <strong>bold</strong> and <code>inline code</code>.</p>
- *   <p>Second paragraph.</p>
- *   </div>
+ * This plugin then sets node.data.hName/hProperties so that remark-rehype
+ * produces the correct <div> element, and prepends a title paragraph child.
  */
+
+import { visit } from 'unist-util-visit';
 
 const ICONS = {
   info:    'ℹ',
@@ -28,65 +28,32 @@ const ICONS = {
   danger:  '⛔',
 };
 
-export function processAdmonitions(text) {
-  const lines = text.split('\n');
-  const result = [];
-  let inAdmonition = false;
-  let admonitionType = '';
-  let admonitionLabel = '';
-  let contentLines = [];
+export function remarkAdmonitions() {
+  return (tree) => {
+    visit(tree, 'containerDirective', (node) => {
+      const type = node.name;
+      const icon = ICONS[type] ?? 'ℹ';
+      const label =
+        node.attributes?.title ??
+        type.charAt(0).toUpperCase() + type.slice(1);
 
-  for (const line of lines) {
-    const openMatch = line.match(/^:::([\w]+)(?:\s+(.+))?$/);
-    const isClose = !openMatch && /^:::\s*$/.test(line);
+      // Tell remark-rehype to render this node as a <div>
+      node.data = {
+        hName: 'div',
+        hProperties: {
+          className: ['admonition', `admonition-${type}`],
+        },
+      };
 
-    if (!inAdmonition && openMatch) {
-      inAdmonition = true;
-      admonitionType = openMatch[1];
-      admonitionLabel =
-        openMatch[2] ?? admonitionType.charAt(0).toUpperCase() + admonitionType.slice(1);
-      contentLines = [];
-    } else if (inAdmonition && isClose) {
-      result.push(renderAdmonition(admonitionType, admonitionLabel, contentLines.join('\n')));
-      inAdmonition = false;
-      contentLines = [];
-    } else if (inAdmonition) {
-      contentLines.push(line);
-    } else {
-      result.push(line);
-    }
-  }
-
-  return result.join('\n');
-}
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-function renderAdmonition(type, label, rawContent) {
-  const icon = ICONS[type] ?? 'ℹ';
-  const paragraphs = rawContent
-    .trim()
-    .split(/\n\n+/)
-    .filter(p => p.trim());
-  const htmlBody = paragraphs
-    .map(p => `<p>${inlineMd(p.trim().replace(/\n/g, ' '))}</p>`)
-    .join('\n');
-  return [
-    `<div class="admonition admonition-${type}">`,
-    `<p class="admonition-title">${icon} ${label}</p>`,
-    htmlBody,
-    `</div>`,
-    '',
-  ].join('\n');
-}
-
-/** Convert the most common inline Markdown to HTML. */
-function inlineMd(text) {
-  return text
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .replace(/`([^`]+)`/g, '<code>$1</code>')
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+      // Prepend the title as a <p class="admonition-title"> child
+      node.children.unshift({
+        type: 'paragraph',
+        data: {
+          hName: 'p',
+          hProperties: { className: ['admonition-title'] },
+        },
+        children: [{ type: 'text', value: `${icon} ${label}` }],
+      });
+    });
+  };
 }

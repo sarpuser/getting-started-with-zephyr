@@ -1,9 +1,13 @@
 /**
  * boardVars.mjs
  *
- * Replaces %PLACEHOLDER% tokens in text based on the target board.
- * Ported directly from gh_pages/plugins/remarkBoardVars.mjs.
+ * Remark plugin that replaces %PLACEHOLDER% tokens in text, inline code, and
+ * fenced code block content based on the target board.
+ *
+ * Adapted from gh_pages/plugins/remarkBoardVars.mjs.
  */
+
+import { visit } from 'unist-util-visit';
 
 export const boardMap = {
   same54: {
@@ -22,8 +26,22 @@ export const boardMap = {
   },
 };
 
-export function applyBoardVars(text, board) {
+function replaceVars(str, vars) {
+  return str.replace(/%(\w+)%/g, (_, key) => vars[key] ?? `%${key}%`);
+}
+
+export function remarkBoardVars({ board }) {
   const vars = boardMap[board];
-  if (!vars) return text;
-  return text.replace(/%(\w+)%/g, (_, key) => vars[key] ?? `%${key}%`);
+  return (tree) => {
+    if (!vars) return;
+    visit(tree, (node) => {
+      if (
+        node.type === 'text' ||
+        node.type === 'inlineCode' ||
+        node.type === 'code'
+      ) {
+        node.value = replaceVars(node.value, vars);
+      }
+    });
+  };
 }

@@ -9,31 +9,62 @@
  *   node generate.mjs --board same54 --os windows  # single PDF
  *
  * Output: lab_manuals/pdf/<board>/Zephyr-Getting-Started_<board>_<os>.pdf
+ *
+ * Pipeline (per source file):
+ *   1. String pre-processing: normalize admonition titles
+ *   2. unified parse: remark-parse + remark-mdx + remark-gfm +
+ *      remark-frontmatter + remark-directive
+ *   3. Remark transforms (AST visitors):
+ *      remarkResolveMdxImports → remarkFilterOs → remarkBoardVars →
+ *      remarkAdmonitions → remarkMagicComments → remarkCleanupMdx →
+ *      remarkCollectH1s (adds id attrs + collects headings for TOC)
+ *   4. remark-rehype (mdast → hast)
+ *   5. Rehype transforms: rehypeEmbedImages → rehype-highlight
+ *   6. rehype-stringify → HTML string
+ *   7. Sections joined with <hr> (CSS page-break-after: always)
+ *   8. Cover page + TOC (using CSS target-counter for page numbers) prepended
+ *   9. Full HTML written to temp file → pagedjs-cli renders PDF
  */
 
 import fs from 'fs';
+import nodeOs from 'os';
 import path from 'path';
+import { execFile } from 'child_process';
+import { promisify } from 'util';
 import { fileURLToPath } from 'url';
-import { mdToPdf } from 'md-to-pdf';
-import { marked } from 'marked';
-import puppeteer from 'puppeteer';
 
-import { filterOs } from './plugins/filterOs.mjs';
-import { applyBoardVars, boardMap } from './plugins/boardVars.mjs';
-import { inlineMdxImports } from './plugins/inlineMdxImports.mjs';
-import { processAdmonitions } from './plugins/admonitions.mjs';
-import { stripMagicComments } from './plugins/stripMagicComments.mjs';
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
+import remarkMdx from 'remark-mdx';
+import remarkGfm from 'remark-gfm';
+import remarkFrontmatter from 'remark-frontmatter';
+import remarkDirective from 'remark-directive';
+import remarkRehype from 'remark-rehype';
+import rehypeHighlight from 'rehype-highlight';
+import rehypeStringify from 'rehype-stringify';
+import { VFile } from 'vfile';
+import { visit } from 'unist-util-visit';
+
+import { remarkResolveMdxImports } from './plugins/inlineMdxImports.mjs';
+import { remarkFilterOs } from './plugins/filterOs.mjs';
+import { remarkBoardVars, boardMap } from './plugins/boardVars.mjs';
+import { remarkAdmonitions } from './plugins/admonitions.mjs';
+import { remarkMagicComments } from './plugins/stripMagicComments.mjs';
+import { remarkCleanupMdx } from './plugins/cleanupMdx.mjs';
+
+const execFileAsync = promisify(execFile);
 
 // ---------------------------------------------------------------------------
 // Paths
 // ---------------------------------------------------------------------------
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const REPO_ROOT = path.resolve(__dirname, '..');
+const __dirname     = path.dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT     = path.resolve(__dirname, '..');
 const LAB_MANUALS_SRC = path.join(REPO_ROOT, 'lab_manuals', 'src');
-const IMAGES_BASE = path.join(REPO_ROOT, 'lab_manuals', 'static', 'images');
-const STYLE_PATH = path.join(__dirname, 'style.css');
-const OUTPUT_BASE = path.join(REPO_ROOT, 'lab_manuals', 'pdf');
+const IMAGES_BASE   = path.join(REPO_ROOT, 'lab_manuals', 'static', 'images');
+const STYLE_PATH    = path.join(__dirname, 'style.css');
+const OUTPUT_BASE   = path.join(REPO_ROOT, 'lab_manuals', 'pdf');
+const PAGEDJS_BIN   = path.join(__dirname, 'node_modules', '.bin', 'pagedjs-cli');
 
 // ---------------------------------------------------------------------------
 // Page assembly order per board
@@ -65,7 +96,7 @@ const PAGE_SEQUENCE = {
   ],
 };
 
-const BOARDS = Object.keys(PAGE_SEQUENCE);
+const BOARDS  = Object.keys(PAGE_SEQUENCE);
 const OS_LIST = ['linux', 'macos', 'windows'];
 
 // MIME types for base64 image embedding
@@ -79,50 +110,166 @@ const MIME = {
 };
 
 // ---------------------------------------------------------------------------
-// Per-file preprocessing pipeline
+// String pre-processing: normalize admonition title syntax
+//
+// remark-directive expects :::type{title="..."}
+// Docusaurus source files use    :::type Some title
 // ---------------------------------------------------------------------------
 
-function processFile(content, filePath, board, os) {
-  // 1. Strip YAML frontmatter (--- ... ---)
-  content = content.replace(/^---\n[\s\S]*?\n---\n/, '');
-
-  // 2. Inline MDX .md imports (<PreOverlay />, <PostOverlay />) and strip
-  //    all import lines (including @theme/Tabs etc.)
-  content = inlineMdxImports(content, filePath, (importedContent, importedPath) =>
-    processFile(importedContent, importedPath, board, os)
+function normalizeAdmonitionTitles(text) {
+  return text.replace(/^:::([\w]+)(?:\s+(.+))?$/gm, (match, type, title) =>
+    title ? `:::${type}{title="${title}"}` : match
   );
+}
 
-  // 3. Belt-and-suspenders: strip any remaining import lines
-  content = content.replace(/^import\s+\S+\s+from\s+['"][^'"]+['"]\s*;?\s*$/gm, '');
+// ---------------------------------------------------------------------------
+// Custom highlight.js language definitions for shell sessions
+// ---------------------------------------------------------------------------
 
-  // 4. Remove JSX comments {/* ... */}
-  content = content.replace(/\{\/\*[\s\S]*?\*\/\}/g, '');
+// bash-session: matches any prompt ending in $ or # (covers "$ ", "(.venv) $ ",
+// "uart:~$ ", "root# ", etc.) then highlights the rest as bash
+function bashSession(hljs) {
+  return {
+    name: 'Bash Session',
+    contains: [{
+      className: 'meta.prompt',
+      begin: /^.*?[$#]\s?/,
+      starts: { end: /[^\\](?=\s*$)/, subLanguage: 'bash' },
+    }],
+  };
+}
 
-  // 5. Filter <Tabs>/<TabItem> blocks — keep only the target OS
-  content = filterOs(content, os);
+// ps-session: matches optional venv prefix + "PS path> " then highlights as powershell
+function psSession(hljs) {
+  return {
+    name: 'PowerShell Session',
+    contains: [{
+      className: 'meta.prompt',
+      begin: /^(?:.*\s+)?PS\s[^>]+>\s?/,
+      starts: { end: /[^\\](?=\s*$)/, subLanguage: 'powershell' },
+    }],
+  };
+}
 
-  // 6. Strip Docusaurus magic comment directives and {highlight} fence syntax
-  content = stripMagicComments(content);
+// ---------------------------------------------------------------------------
+// Rehype plugin: embed /images/... as base64 data URIs
+// ---------------------------------------------------------------------------
 
-  // 7. Apply board variable substitutions (%BOARD%, %BOARD_NAME%, etc.)
-  content = applyBoardVars(content, board);
+function rehypeEmbedImages() {
+  return (tree) => {
+    visit(tree, 'element', (node) => {
+      if (node.tagName !== 'img') return;
+      const src = node.properties?.src;
+      if (!src?.startsWith('/images/')) return;
+      const imgPath = path.join(IMAGES_BASE, src.slice('/images/'.length));
+      if (!fs.existsSync(imgPath)) return;
+      const ext  = path.extname(imgPath).toLowerCase().slice(1);
+      const mime = MIME[ext] ?? 'application/octet-stream';
+      const data = fs.readFileSync(imgPath).toString('base64');
+      node.properties.src = `data:${mime};base64,${data}`;
+    });
+  };
+}
 
-  // 8. Convert :::admonition blocks to styled HTML divs
-  content = processAdmonitions(content);
+// ---------------------------------------------------------------------------
+// Remark plugin: collect h1 headings and add id attributes
+// ---------------------------------------------------------------------------
 
-  // 9. Embed images as base64 data URIs so Chromium can always load them
-  content = embedImages(content);
+function extractNodeText(node) {
+  if (node.type === 'text' || node.type === 'inlineCode') return node.value;
+  if (node.children) return node.children.map(extractNodeText).join('');
+  return '';
+}
 
-  return content;
+function slugify(text) {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-');
+}
+
+function remarkCollectH1s({ headingsArr }) {
+  return (tree) => {
+    visit(tree, 'heading', (node) => {
+      if (node.depth !== 1) return;
+      const text = extractNodeText(node);
+      const id   = slugify(text);
+      node.data = node.data ?? {};
+      node.data.hProperties = { ...(node.data.hProperties ?? {}), id };
+      headingsArr.push({ text, id });
+    });
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Unified processor factory
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns a processor that parses and applies all remark transforms.
+ * Does NOT include the rehype conversion — used for imported .md files
+ * (which need to be inlined as AST nodes, not serialised to HTML).
+ */
+function createTransformProcessor(board, targetOs) {
+  // processImportedFile is defined inside the factory so it can close over
+  // createTransformProcessor for recursive imports without a circular dep.
+  function processImportedFile(filePath) {
+    const content    = fs.readFileSync(filePath, 'utf8');
+    const normalized = normalizeAdmonitionTitles(content);
+    const file       = new VFile({ path: filePath, value: normalized });
+    const proc       = createTransformProcessor(board, targetOs);
+    const tree       = proc.parse(file);
+    proc.runSync(tree, file);
+    return tree;
+  }
+
+  return unified()
+    .use(remarkParse)
+    .use(remarkMdx)
+    .use(remarkGfm)
+    .use(remarkFrontmatter, ['yaml'])
+    .use(remarkDirective)
+    .use(remarkResolveMdxImports, { processImportedFile })
+    .use(remarkFilterOs, { os: targetOs })
+    .use(remarkBoardVars, { board })
+    .use(remarkAdmonitions)
+    .use(remarkMagicComments)
+    .use(remarkCleanupMdx);
+}
+
+// ---------------------------------------------------------------------------
+// Process a single source file → { html, headings }
+// ---------------------------------------------------------------------------
+
+function processSourceFile(filePath, board, targetOs) {
+  const content    = fs.readFileSync(filePath, 'utf8');
+  const normalized = normalizeAdmonitionTitles(content);
+  const file       = new VFile({ path: filePath, value: normalized });
+
+  const headingsArr = [];
+
+  const result = createTransformProcessor(board, targetOs)
+    .use(remarkCollectH1s, { headingsArr })
+    .use(remarkRehype, { allowDangerousHtml: true })
+    .use(rehypeEmbedImages)
+    .use(rehypeHighlight, {
+      ignoreMissing: true,
+      languages: { 'bash-session': bashSession, 'ps-session': psSession },
+    })
+    .use(rehypeStringify, { allowDangerousHtml: true })
+    .processSync(file);
+
+  return { html: String(result), headings: headingsArr };
 }
 
 // ---------------------------------------------------------------------------
 // Cover page
 // ---------------------------------------------------------------------------
 
-function buildCoverPage(board, os) {
-  const vars = boardMap[board];
-  const osName = os.charAt(0).toUpperCase() + os.slice(1);
+function buildCoverPage(board, targetOs) {
+  const vars   = boardMap[board];
+  const osName = targetOs.charAt(0).toUpperCase() + targetOs.slice(1);
   return [
     '<div class="cover-page">',
     '  <p class="cover-label">Microchip Technology</p>',
@@ -134,161 +281,122 @@ function buildCoverPage(board, os) {
 }
 
 // ---------------------------------------------------------------------------
-// Table of contents
+// Table of contents — page numbers via CSS target-counter (pagedjs)
 // ---------------------------------------------------------------------------
 
-function slugify(text) {
-  return text
-    .replace(/<[^>]+>/g, '')   // strip HTML tags
-    .toLowerCase()
-    .replace(/[^\w\s-]/g, '')  // remove punctuation
-    .trim()
-    .replace(/\s+/g, '-');     // spaces → hyphens
-}
+function buildToc(headings) {
+  const items = headings
+    .map(
+      ({ text, id }) =>
+        `  <li class="toc-entry">` +
+        `<a class="toc-title" href="#${id}">${text}</a>` +
+        `<span class="toc-fill"></span>` +
+        `<span class="toc-num" data-ref="#${id}"></span>` +
+        `</li>`
+    )
+    .join('\n');
 
-// A4 full page height in CSS pixels at 96 dpi — used for page number calculation
-const A4_PAGE_HEIGHT_PX = 297 * (96 / 25.4); // ≈ 1122 px
-
-/**
- * Render the combined markdown to HTML, open it in a headless browser in print
- * mode, and measure each h1's offsetTop to derive its page number.
- *
- * Returns a Map<headingText, pageNumber>.
- */
-async function measureHeadingPages(markdown, css) {
-  const html = marked.parse(markdown);
-  const fullHtml = `<!DOCTYPE html><html><head>
-    <meta charset="utf-8">
-    <style>${css}</style>
-  </head><body>${html}</body></html>`;
-
-  const browser = await puppeteer.launch({
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  });
-  try {
-    const page = await browser.newPage();
-    await page.emulateMediaType('print');
-    await page.setContent(fullHtml, { waitUntil: 'networkidle0' });
-
-    const measurements = await page.evaluate((pageH) => {
-      return Array.from(document.querySelectorAll('h1')).map(el => ({
-        text: el.textContent.trim(),
-        page: Math.floor(el.offsetTop / pageH) + 1,
-      }));
-    }, A4_PAGE_HEIGHT_PX);
-
-    return new Map(measurements.map(m => [m.text, m.page]));
-  } finally {
-    await browser.close();
-  }
-}
-
-function buildToc(markdown, pageMap) {
-  const headingRe = /^#{1}\s+(.+)$/gm;
-  const items = [];
-  let match;
-  while ((match = headingRe.exec(markdown)) !== null) {
-    const text = match[1].trim();
-    items.push({ text, id: slugify(text), page: pageMap?.get(text) ?? null });
-  }
-
-  const out = ['<ul class="toc">'];
-  for (const { text, id, page } of items) {
-    const pageHtml = page != null
-      ? `<span class="toc-dots"></span><span class="toc-page">${page}</span>`
-      : '';
-    out.push(
-      `  <li class="toc-h1"><a href="#${id}" class="toc-row">` +
-      `<span class="toc-text">${text}</span>${pageHtml}</a></li>`
-    );
-  }
-  out.push('</ul>');
-
-  return `<h1>Table of Contents</h1>\n${out.join('\n')}`;
+  return [
+    '<nav class="toc">',
+    '<h1>Table of Contents</h1>',
+    '<ul>',
+    items,
+    '</ul>',
+    '</nav>',
+  ].join('\n');
 }
 
 // ---------------------------------------------------------------------------
-// Embed images as base64 data URIs
+// Render PDF with pagedjs-cli
 // ---------------------------------------------------------------------------
 
-function embedImages(content) {
-  return content.replace(/!\[([^\]]*)\]\(\/images\/([^)]+)\)/g, (match, alt, imgPath) => {
-    const fullPath = path.join(IMAGES_BASE, imgPath);
-    if (!fs.existsSync(fullPath)) return match; // leave broken ref as-is
-    const ext = path.extname(imgPath).toLowerCase().replace('.', '');
-    const mime = MIME[ext] ?? 'application/octet-stream';
-    const data = fs.readFileSync(fullPath).toString('base64');
-    return `![${alt}](data:${mime};base64,${data})`;
-  });
+// Path to system Chrome — pagedjs-cli uses puppeteer which respects this env var
+const CHROME_PATH =
+  process.env.PUPPETEER_EXECUTABLE_PATH ??
+  '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+
+async function renderPdf(htmlPath, outputPath) {
+  await execFileAsync(
+    PAGEDJS_BIN,
+    ['--inputs', htmlPath, '--output', outputPath, '--timeout', '120000'],
+    {
+      cwd: __dirname,
+      env: { ...process.env, PUPPETEER_EXECUTABLE_PATH: CHROME_PATH },
+    }
+  );
 }
 
 // ---------------------------------------------------------------------------
 // PDF generation for one board+OS combination
 // ---------------------------------------------------------------------------
 
-async function generatePdf(board, os) {
-  console.log(`Generating ${board} / ${os} ...`);
+async function generatePdf(board, targetOs) {
+  console.log(`Generating ${board} / ${targetOs} ...`);
 
-  const sections = [];
+  const allHeadings      = [];
+  const sectionHtmlParts = [];
+
   for (const relPath of PAGE_SEQUENCE[board]) {
     const filePath = path.join(LAB_MANUALS_SRC, relPath);
-    const raw = fs.readFileSync(filePath, 'utf8');
-    sections.push(processFile(raw, filePath, board, os).trim());
+    const { html, headings } = processSourceFile(filePath, board, targetOs);
+    allHeadings.push(...headings);
+    sectionHtmlParts.push(html);
   }
 
-  // --- between sections becomes a CSS page break
-  const combined = sections.join('\n\n---\n\n');
+  const css   = fs.readFileSync(STYLE_PATH, 'utf8');
+  const cover = buildCoverPage(board, targetOs);
+  const toc   = buildToc(allHeadings);
+  // Sections separated by <hr> — CSS renders hr as page-break-after: always
+  const body  = sectionHtmlParts.join('\n<hr>\n');
 
-  const css = fs.readFileSync(STYLE_PATH, 'utf8');
-
-  // Pass 1: measure heading page numbers from the body content alone,
-  // then offset by 2 (cover page + TOC page) to get final page numbers.
-  const rawPageMap = await measureHeadingPages(combined, css);
-  const FRONT_MATTER_PAGES = 2; // cover + TOC
-  const pageMap = new Map([...rawPageMap].map(([k, v]) => [k, v + FRONT_MATTER_PAGES]));
-
-  const cover = buildCoverPage(board, os);
-  const toc   = buildToc(combined, pageMap);
-  const full  = `${cover}\n\n---\n\n${toc}\n\n---\n\n${combined}`;
+  // cover → toc and toc → body page breaks come from the named page transitions
+  // (page: cover / page: toc in CSS). Only body sections need explicit <hr>.
+  const fullHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <style>${css}</style>
+</head>
+<body>
+${cover}
+${toc}
+${body}
+</body>
+</html>`;
 
   const outputDir = path.join(OUTPUT_BASE, board);
   fs.mkdirSync(outputDir, { recursive: true });
 
   const outputPath = path.join(
     outputDir,
-    `Zephyr-Getting-Started_${board}_${os}.pdf`
+    `Zephyr-Getting-Started_${board}_${targetOs}.pdf`
   );
 
-  await mdToPdf(
-    { content: full },
-    {
-      dest: outputPath,
-      css,
-      launch_options: {
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      },
-      pdf_options: {
-        format: 'A4',
-        margin: { top: '18mm', bottom: '18mm', left: '18mm', right: '18mm' },
-        printBackground: true,
-      },
-    }
+  const tmpPath = path.join(
+    nodeOs.tmpdir(),
+    `pdf-gen-${board}-${targetOs}-${Date.now()}.html`
   );
+  fs.writeFileSync(tmpPath, fullHtml, 'utf8');
 
-  console.log(`  → ${path.relative(REPO_ROOT, outputPath)}`);
+  try {
+    await renderPdf(tmpPath, outputPath);
+    console.log(`  → ${path.relative(REPO_ROOT, outputPath)}`);
+  } finally {
+    fs.unlinkSync(tmpPath);
+  }
 }
 
 // ---------------------------------------------------------------------------
 // CLI argument parsing & validation
 // ---------------------------------------------------------------------------
 
-const args = process.argv.slice(2);
-let boards = BOARDS;
-let osList = OS_LIST;
+const args   = process.argv.slice(2);
+let boards   = BOARDS;
+let osList   = OS_LIST;
 
 for (let i = 0; i < args.length; i++) {
   if (args[i] === '--board' && args[i + 1]) boards = [args[++i]];
-  if (args[i] === '--os' && args[i + 1]) osList = [args[++i]];
+  if (args[i] === '--os'    && args[i + 1]) osList = [args[++i]];
 }
 
 for (const b of boards) {
@@ -309,7 +417,7 @@ for (const o of osList) {
 // ---------------------------------------------------------------------------
 
 for (const board of boards) {
-  for (const os of osList) {
-    await generatePdf(board, os);
+  for (const targetOs of osList) {
+    await generatePdf(board, targetOs);
   }
 }

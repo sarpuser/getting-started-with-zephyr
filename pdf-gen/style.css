@@ -4,8 +4,35 @@
 
 @page {
   size: A4;
-  margin: 18mm 18mm;
+  margin: 18mm 18mm 22mm 18mm; /* extra bottom for footer */
+
+  @bottom-center {
+    content: counter(page);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    font-size: 9pt;
+    color: #666;
+  }
+
+  @bottom-right {
+    content: "© Microchip Technology";
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    font-size: 8pt;
+    color: #aaa;
+  }
 }
+
+/* Cover page and TOC page: suppress page numbers */
+@page cover {
+  @bottom-center { content: none; }
+  @bottom-right  { content: none; }
+}
+@page toc {
+  @bottom-center { content: none; }
+  @bottom-right  { content: none; }
+}
+
+.cover-page { page: cover; }
+.toc        { page: toc; }
 
 /* ── Cover page ───────────────────────────────────────────── */
 .cover-page {
@@ -48,41 +75,43 @@
 }
 
 /* ── Table of Contents ────────────────────────────────────── */
-.toc {
+/* Page numbers via CSS target-counter (pagedjs). Dots via border-bottom. */
+.toc ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.toc-h1 {
+.toc-entry {
+  display: flex;
+  align-items: baseline;
   padding: 2pt 0;
 }
 
-.toc-row {
-  display: flex;
-  align-items: baseline;
+.toc-title {
+  flex: none;
   text-decoration: none;
   color: #1a1a1a;
   font-size: 10pt;
   font-weight: 700;
+  white-space: nowrap;
 }
 
-.toc-text {
-  flex-shrink: 0;
-  padding-right: 4pt;
-}
-
-.toc-dots {
+/* Dotted filler between title and page number */
+.toc-fill {
   flex: 1;
   border-bottom: 1px dotted #888;
-  position: relative;
-  top: -2.5pt;
-  min-width: 20pt;
+  align-self: flex-end;
+  margin: 0 4pt 2pt;
+  min-width: 16pt;
 }
 
-.toc-page {
-  flex-shrink: 0;
-  padding-left: 4pt;
+.toc-num::after {
+  content: target-counter(attr(data-ref), page);
+  font-size: 10pt;
+  font-weight: 700;
+  color: #1a1a1a;
+  white-space: nowrap;
 }
 
 /* ── Body ─────────────────────────────────────────────────── */
@@ -249,6 +278,13 @@ hr {
   page-break-after: always;
   margin: 0;
   height: 0;
+}
+
+/* ── Shell session prompt styling ─────────────────────────── */
+/* highlight.js emits class="hljs-meta prompt_" for the prompt span.
+   Mute it so the command stands out, matching the Docusaurus website. */
+.hljs-meta.prompt_ {
+  opacity: 0.45;
 }
 
 /* ── Code line annotations ────────────────────────────────── */

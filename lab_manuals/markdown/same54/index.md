@@ -2,7 +2,7 @@
 title: "SAME54  -  Board Overview"
 sidebar_label: Overview
 sidebar_position: 1
-slug: /docs/same54
+slug: /same54
 ---
 
 # SAME54 Xplained Pro  -  Board Overview

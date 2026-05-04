@@ -3,10 +3,8 @@
 title: "PIC32BZ6  -  Board Overview"
 sidebar_label: Overview
 sidebar_position: 1
-slug: /docs/pic32bz6
 ---
 
-{/* TODO: replace board name in heading (SAME54 Xplained Pro → PIC32BZ6 board name) */}
 # PIC32BZ6  -  Board Overview
 
 ## Hardware Requirements

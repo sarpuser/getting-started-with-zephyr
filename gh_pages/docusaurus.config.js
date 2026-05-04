@@ -60,9 +60,9 @@ const config = {
       ({
         docs: {
           path: '../lab_manuals/markdown',
-          routeBasePath: 'docs',
+          routeBasePath: '/',
           sidebarPath: './sidebars.js',
-          exclude: ['**/shared/**'],
+          exclude: ['**/shared/**', '**/_*.{md,mdx}', '**/_*/**'],
           remarkPlugins: [remarkBoardVars],
         },
         blog: false,

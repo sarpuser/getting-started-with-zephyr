@@ -6,10 +6,10 @@ Replace `<board>` throughout with your board's short identifier (e.g. `same54`, 
 
 ---
 
-## 1. Create Source Files (`lab_manuals/src/`)
+## 1. Create Source Files (`lab_manuals/markdown/`)
 
 ```bash
-mkdir -p lab_manuals/src/<board>
+mkdir -p lab_manuals/markdown/<board>
 ```
 
 **Required files:**
@@ -35,7 +35,7 @@ slug: /docs/<board>
 **`lab3.md`** imports the shared overlay files for common content and adds board-specific steps in between. The overlay files live in `shared/` but must be symlinked into the board directory so the relative imports resolve:
 
 ```bash
-cd lab_manuals/src/<board>
+cd lab_manuals/markdown/<board>
 ln -s ../shared/_lab3-pre-overlay.md _lab3-pre-overlay.md
 ln -s ../shared/_lab3-post-overlay.md _lab3-post-overlay.md
 ```

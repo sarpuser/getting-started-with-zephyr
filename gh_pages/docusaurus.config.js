@@ -59,7 +59,7 @@ const config = {
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
         docs: {
-          path: '../lab_manuals/src',
+          path: '../lab_manuals/markdown',
           routeBasePath: 'docs',
           sidebarPath: './sidebars.js',
           exclude: ['**/shared/**'],

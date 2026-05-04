@@ -1,6 +1,6 @@
 # PDF Generator
 
-Generates printable PDF lab manuals from the MDX source in `lab_manuals/src/`. Produces one PDF per board/OS combination (6 total by default: 2 boards × 3 OSes).
+Generates printable PDF lab manuals from the MDX source in `lab_manuals/markdown/`. Produces one PDF per board/OS combination (6 total by default: 2 boards × 3 OSes).
 
 ## Requirements
 

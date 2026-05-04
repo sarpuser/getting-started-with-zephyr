@@ -62,7 +62,7 @@ const execFileAsync = promisify(execFile);
 
 const __dirname     = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT     = path.resolve(__dirname, '..');
-const LAB_MANUALS_SRC = path.join(REPO_ROOT, 'lab_manuals', 'src');
+const LAB_MANUALS_SRC = path.join(REPO_ROOT, 'lab_manuals', 'markdown');
 const IMAGES_BASE   = path.join(REPO_ROOT, 'lab_manuals', 'static', 'images');
 const STYLE_PATH    = path.join(__dirname, 'style.css');
 const OUTPUT_BASE   = path.join(REPO_ROOT, 'lab_manuals', 'pdf');

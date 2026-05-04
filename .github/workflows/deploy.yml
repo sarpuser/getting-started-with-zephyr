@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'lab_manuals/src/**'
+      - 'lab_manuals/markdown/**'
       - 'gh_pages/**'
   workflow_dispatch:
 

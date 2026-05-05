@@ -2,6 +2,8 @@
 
 The Docusaurus site that serves the lab manuals online. Reads content from `lab_manuals/markdown/` directly — no content duplication.
 
+To adapt this for a different lab manual, edit `docusaurus.config.js` and `sidebars.js` — see [`README-ADAPTING.md`](../README-ADAPTING.md).
+
 Live site: [sarpuser.github.io/getting-started-with-zephyr](https://sarpuser.github.io/getting-started-with-zephyr/)
 
 ## Setup

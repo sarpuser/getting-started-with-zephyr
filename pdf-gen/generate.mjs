@@ -45,9 +45,10 @@ import rehypeStringify from 'rehype-stringify';
 import { VFile } from 'vfile';
 import { visit } from 'unist-util-visit';
 
+import config from './config.mjs';
 import { remarkResolveMdxImports } from './plugins/inlineMdxImports.mjs';
 import { remarkFilterOs } from './plugins/filterOs.mjs';
-import { remarkBoardVars, boardMap } from './plugins/boardVars.mjs';
+import { remarkBoardVars } from './plugins/boardVars.mjs';
 import { remarkAdmonitions } from './plugins/admonitions.mjs';
 import { remarkMagicComments } from './plugins/stripMagicComments.mjs';
 import { remarkCleanupMdx } from './plugins/cleanupMdx.mjs';
@@ -69,37 +70,11 @@ const OUTPUT_BASE   = path.join(REPO_ROOT, 'lab_manuals', 'pdf');
 const PAGEDJS_BIN   = path.join(__dirname, 'node_modules', '.bin', 'pagedjs-cli');
 
 // ---------------------------------------------------------------------------
-// Page assembly order per board
+// Boards and OS list — derived from config.mjs
 // ---------------------------------------------------------------------------
 
-const PAGE_SEQUENCE = {
-  same54: [
-    'home.md',
-    'same54/index.md',
-    'shared/lab1.md',
-    'shared/lab2.md',
-    'same54/lab3.md',
-    'appendices/appendix-a.md',
-    'appendices/appendix-b.md',
-    'appendices/appendix-c.md',
-    'appendices/appendix-d.md',
-  ],
-  pic32bz6: [
-    'home.md',
-    'pic32bz6/index.md',
-    'pic32bz6/additional-software-setup.md',
-    'shared/lab1.md',
-    'shared/lab2.md',
-    'pic32bz6/lab3.md',
-    'appendices/appendix-a.md',
-    'appendices/appendix-b.md',
-    'appendices/appendix-c.md',
-    'appendices/appendix-d.md',
-  ],
-};
-
-const BOARDS  = Object.keys(PAGE_SEQUENCE);
-const OS_LIST = ['linux', 'macos', 'windows'];
+const BOARDS  = Object.keys(config.versions.boards);
+const OS_LIST = config.versions.os;
 
 // MIME types for base64 image embedding
 const MIME = {
@@ -205,7 +180,7 @@ function createTransformProcessor(board, targetOs) {
     .use(remarkDirective)
     .use(remarkResolveMdxImports, { processImportedFile })
     .use(remarkFilterOs, { os: targetOs })
-    .use(remarkBoardVars, { board })
+    .use(remarkBoardVars, { vars: config.versions.boards[board]?.vars ?? {} })
     .use(remarkAdmonitions)
     .use(remarkMagicComments)
     .use(remarkCleanupMdx);
@@ -240,13 +215,13 @@ function processSourceFile(filePath, board, targetOs) {
 // ---------------------------------------------------------------------------
 
 function buildCoverPage(board, targetOs) {
-  const vars   = boardMap[board];
-  const osName = targetOs.charAt(0).toUpperCase() + targetOs.slice(1);
+  const boardCfg = config.versions.boards[board];
+  const osName   = targetOs.charAt(0).toUpperCase() + targetOs.slice(1);
   return [
     '<div class="cover-page">',
-    '  <p class="cover-label">Microchip Technology</p>',
-    '  <h1 class="cover-title">Getting Started<br>with Zephyr RTOS</h1>',
-    `  <p class="cover-board">${vars.BOARD_NAME}</p>`,
+    `  <p class="cover-label">${config.cover.organization}</p>`,
+    `  <h1 class="cover-title">${config.cover.title}</h1>`,
+    `  <p class="cover-board">${boardCfg.displayName}</p>`,
     `  <p class="cover-os">${osName}</p>`,
     '</div>',
   ].join('\n');
@@ -308,8 +283,21 @@ async function generatePdf(board, targetOs) {
   const allHeadings      = [];
   const sectionHtmlParts = [];
 
-  for (const relPath of PAGE_SEQUENCE[board]) {
-    const filePath = path.join(LAB_MANUALS_SRC, relPath);
+  // Intro file (always first)
+  const introPath = path.join(LAB_MANUALS_SRC, config.introFile);
+  if (fs.existsSync(introPath)) {
+    const { html, headings } = processSourceFile(introPath, board, targetOs);
+    allHeadings.push(...headings);
+    sectionHtmlParts.push(html);
+  }
+
+  for (const entry of config.pages) {
+    // Bare filename → look in the board's own directory (skip if missing).
+    // Path with a slash → resolve from lab_manuals/markdown/ root.
+    const filePath = entry.includes('/')
+      ? path.join(LAB_MANUALS_SRC, entry)
+      : path.join(LAB_MANUALS_SRC, board, entry);
+    if (!fs.existsSync(filePath)) continue;
     const { html, headings } = processSourceFile(filePath, board, targetOs);
     allHeadings.push(...headings);
     sectionHtmlParts.push(html);
@@ -341,7 +329,7 @@ ${body}
 
   const outputPath = path.join(
     outputDir,
-    `Zephyr-Getting-Started_${board}_${targetOs}.pdf`
+    `${config.outputName}_${board}_${targetOs}.pdf`
   );
 
   const tmpPath = path.join(
@@ -372,7 +360,7 @@ for (let i = 0; i < args.length; i++) {
 }
 
 for (const b of boards) {
-  if (!PAGE_SEQUENCE[b]) {
+  if (!config.versions.boards[b]) {
     console.error(`Unknown board: "${b}". Valid boards: ${BOARDS.join(', ')}`);
     process.exit(1);
   }

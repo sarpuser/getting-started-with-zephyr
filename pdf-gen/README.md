@@ -1,6 +1,8 @@
 # PDF Generator
 
-Generates printable PDF lab manuals from the MDX source in `lab_manuals/markdown/`. Produces one PDF per board/OS combination (6 total by default: 2 boards × 3 OSes).
+Generates printable PDF lab manuals from the Markdown/MDX source in `lab_manuals/markdown/`. Produces one PDF per board/OS combination (6 total by default: 2 boards × 3 OSes).
+
+To adapt this for a different lab manual, edit **`config.mjs`** only — see [`README-ADAPTING.md`](../README-ADAPTING.md).
 
 ## Requirements
 
@@ -54,9 +56,10 @@ Each source file is processed through:
 
 | File | Purpose |
 |------|---------|
-| `generate.mjs` | Entry point: `PAGE_SEQUENCE`, processor factory, TOC/cover builder |
+| `config.mjs` | **All user configuration**: cover text, boards, OS list, page sequence |
+| `generate.mjs` | Entry point: processor factory, TOC/cover builder |
 | `style.css` | PDF stylesheet (CSS Paged Media: margins, page numbers, TOC) |
-| `plugins/boardVars.mjs` | Board variable map and substitution plugin |
+| `plugins/boardVars.mjs` | Variable substitution plugin |
 | `plugins/filterOs.mjs` | OS tab filtering |
 | `plugins/inlineMdxImports.mjs` | MDX import resolution |
 | `plugins/admonitions.mjs` | Admonition rendering |
@@ -72,3 +75,7 @@ PUPPETEER_EXECUTABLE_PATH="/path/to/chrome" node generate.mjs
 ## Adding a New Board
 
 See [`ADDING_BOARDS.md`](../ADDING_BOARDS.md) for the full checklist.
+
+## Adapting for a Different Lab Manual
+
+See [`ADAPTING_TO_OTHER_LAB_MANUALS.md`](../ADAPTING_TO_OTHER_LAB_MANUALS.md).

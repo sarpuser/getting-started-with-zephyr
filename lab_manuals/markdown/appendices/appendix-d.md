@@ -41,6 +41,7 @@ Instead of running `west init` to download the main Zephyr repo, it is possible 
   ```bash-session
   (.venv) $ west blob fetch hal_microchip
   ```
+
   </TabItem>
   <TabItem value="windows" label="Windows">
 
@@ -57,9 +58,9 @@ Instead of running `west init` to download the main Zephyr repo, it is possible 
   </TabItem>
 </Tabs>
 
-## Switching to the Zephyr4Microchip repo *after* running `west init`
+## Switching to the Zephyr4Microchip Repo *after* running `west init`
 
-If you already ran `west init` and downloaded the regular Zephyr repo, you need to change the git remote and run `west update`. Run the following in your terminal in your zephyr project directory:
+If you already ran `west init` and downloaded the regular Zephyr repo, you need to change the git remote and run `west update`. Run the following commands from your Zephyr project directory:
 
 <Tabs groupId="os">
   <TabItem value="linux" label="Ubuntu">

@@ -6,6 +6,7 @@ on:
     paths:
       - 'lab_manuals/markdown/**'
       - 'gh_pages/**'
+      - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
 permissions:

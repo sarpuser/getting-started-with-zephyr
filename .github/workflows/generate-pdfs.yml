@@ -6,7 +6,7 @@ on:
     paths:
       - 'lab_manuals/markdown/**'
       - 'pdf-gen/**'
-      - '.github/generate-pdfs.yml'
+      - '.github/workflows/generate-pdfs.yml'
   workflow_dispatch:
 
 permissions:

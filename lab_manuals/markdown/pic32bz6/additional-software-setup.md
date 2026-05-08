@@ -10,7 +10,7 @@ import TabItem from '@theme/TabItem';
 
 # Additional Software Setup
 
-This board requires additional software setup. Complete both steps below before proceeding to the labs.
+This board requires additional software setup. Complete all steps below before proceeding to the labs.
 
 ## Switching to the Zephyr4Microchip Repo
 
@@ -115,3 +115,48 @@ Adding new board support to the upstream OpenOCD release takes time. Microchip p
 
   </TabItem>
 </Tabs>
+
+## Installing Zephyr SDK v0.17.4
+
+:::warning
+The Zephyr Getting Started Guide installs the latest SDK, which is currently v1.0.1. This version is **not compatible** with the Microchip Zephyr fork used in this course. You must install SDK v0.17.4 alongside it.
+:::
+
+Run the following commands from your Zephyr project directory. Once installed, the build system will automatically select v0.17.4.
+
+<Tabs groupId="os">
+  <TabItem value="linux" label="Ubuntu">
+
+  ```bash-session
+  $ source .venv/bin/activate
+  ```
+  ```bash-session
+  (.venv) $ west sdk install --version 0.17.4 -t arm-zephyr-eabi
+  ```
+
+  </TabItem>
+  <TabItem value="macos" label="macOS">
+
+  ```bash-session
+  $ source .venv/bin/activate
+  ```
+  ```bash-session
+  (.venv) $ west sdk install --version 0.17.4 -t arm-zephyr-eabi
+  ```
+
+  </TabItem>
+  <TabItem value="windows" label="Windows">
+
+  ```ps-session
+  PS C:\Users\...\zephyrproject> .\.venv\Scripts\Activate.ps1
+  ```
+  ```ps-session
+  (.venv) PS C:\Users\...\zephyrproject> west sdk install --version 0.17.4 -t arm-zephyr-eabi
+  ```
+
+  </TabItem>
+</Tabs>
+
+:::tip
+The `-t arm-zephyr-eabi` flag installs only the ARM cross-compiler toolchain, which targets the ARM Cortex-M4 processor on this board. Without it, `west sdk install` downloads cross-compilers for every supported target architecture (~4 GB). The host machine architecture (your laptop's CPU) is detected automatically regardless of this flag.
+:::

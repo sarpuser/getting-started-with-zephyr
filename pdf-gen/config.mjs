@@ -100,6 +100,7 @@ export default {
     'appendices/appendix-b.md',
     'appendices/appendix-c.md',
     'appendices/appendix-d.md',
+    'appendices/appendix-e.md',
   ],
 
 };

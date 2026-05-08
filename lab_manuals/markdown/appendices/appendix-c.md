@@ -1,6 +1,6 @@
 ---
 title: "Appendix C: Flashing the WINC1500 Firmware"
-sidebar_label: "Appendix C: – WINC1500 Firmware"
+sidebar_label: "Appendix C: Flashing the WINC1500 Firmware"
 sidebar_position: 3
 slug: appendix-c
 ---
@@ -58,10 +58,6 @@ WINC1500 firmware update has now been completed, and you may continue with this 
 
 ---
 
-:::tip Restoring the firmware later
+:::tip
 You may need to restore your WINC1500 firmware version at a later time. To do so, simply follow these same steps using a different standalone ASF version from the download link in Step 1.
-:::
-
-:::info EXT3 Overlay Alternative
-The EXT3 Overlay Alternative that previously appeared in this section of the original lab manual has been moved into **Lab 3, Step 3.2.3** under a collapsible section.
 :::

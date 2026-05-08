@@ -1,6 +1,6 @@
 ---
 title: "Appendix B: Debug your project in VSCode"
-sidebar_label: "Appendix B – VSCode Debug"
+sidebar_label: "Appendix B: Debug your project in VSCode"
 sidebar_position: 2
 slug: appendix-b
 ---

@@ -20,7 +20,7 @@ This step is common to all platforms. Follow the official Zephyr documentation t
 
 ## Step 2: Install OpenOCD
 
-:::warning Install OpenOCD explicitly
+:::warning
 OpenOCD must be installed separately from the Zephyr SDK. Even if your Zephyr environment is fully configured, flashing and debugging with OpenOCD will fail unless OpenOCD is installed on your host and available on your system PATH.
 :::
 

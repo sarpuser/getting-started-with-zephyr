@@ -94,7 +94,7 @@ Adding new board support to the upstream OpenOCD release takes time. Microchip p
 
   ```bash-session
   $ cd ~/zephyrproject
-  $ git clone https://github.com/sarpuser/openOCD-wireless.git
+  $ git clone https://github.com/MicrochipTech/openOCD-wireless
   ```
 
   </TabItem>
@@ -102,7 +102,7 @@ Adding new board support to the upstream OpenOCD release takes time. Microchip p
 
   ```bash-session
   $ cd ~/zephyrproject
-  $ git clone https://github.com/sarpuser/openOCD-wireless.git
+  $ git clone https://github.com/MicrochipTech/openOCD-wireless
   ```
 
   </TabItem>
@@ -110,7 +110,7 @@ Adding new board support to the upstream OpenOCD release takes time. Microchip p
 
   ```ps-session
   PS C:\Users\...> cd C:\Users\...\zephyrproject
-  PS C:\Users\...\zephyrproject> git clone https://github.com/sarpuser/openOCD-wireless.git
+  PS C:\Users\...\zephyrproject> git clone https://github.com/MicrochipTech/openOCD-wireless
   ```
 
   </TabItem>

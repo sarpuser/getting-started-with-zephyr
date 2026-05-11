@@ -56,10 +56,10 @@ Download the pre-built Windows binary from the [Zephyr host-tools page](https://
   2. In the System Properties dialog, click **Environment Variables...**.
   3. Under **System variables**, select **Path** and click **Edit...**.
   4. Click **New** and enter the full path to the OpenOCD `bin\` folder (e.g. `C:\openocd\bin`).
-  5. Click **OK** on all dialogs to save, then **reboot**.
+  5. Click **OK** on all dialogs to save, then **restart your terminal application**.
 
   {/* TODO: add screenshot of the Environment Variables dialog with the OpenOCD bin path entered */}
-  ![Windows Environment Variables dialog showing OpenOCD bin path added to Path](/images/windows_openocd_path.png)
+  ![Windows Environment Variables dialog showing OpenOCD bin path added to Path](/images/appendices/windows_openocd_path.png)
 
   Verify the install by opening a new PowerShell window and running:
 

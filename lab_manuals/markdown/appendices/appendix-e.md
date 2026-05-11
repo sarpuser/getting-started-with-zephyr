@@ -27,7 +27,6 @@ Adding new board support to the upstream OpenOCD release takes time. Microchip p
   <TabItem value="linux" label="Ubuntu">
 
   ```bash-session
-  $ cd ~/zephyrproject
   $ git clone https://github.com/MicrochipTech/openOCD-wireless
   ```
 
@@ -35,7 +34,6 @@ Adding new board support to the upstream OpenOCD release takes time. Microchip p
   <TabItem value="macos" label="macOS">
 
   ```bash-session
-  $ cd ~/zephyrproject
   $ git clone https://github.com/MicrochipTech/openOCD-wireless
   ```
 
@@ -43,7 +41,6 @@ Adding new board support to the upstream OpenOCD release takes time. Microchip p
   <TabItem value="windows" label="Windows">
 
   ```ps-session
-  PS C:\Users\...> cd C:\Users\...\zephyrproject
   PS C:\Users\...\zephyrproject> git clone https://github.com/MicrochipTech/openOCD-wireless
   ```
 

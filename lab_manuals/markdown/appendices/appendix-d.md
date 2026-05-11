@@ -72,7 +72,7 @@ If you already ran `west init` and downloaded the regular Zephyr repo, you need 
   $ git -C zephyr fetch
   ```
   ```bash-session
-  $ git -C zephyr checkout mchp_pic32cx_v420
+  $ git -C zephyr checkout mchp_pic32cxbz_v420
   ```
   ```bash-session
   $ source .venv/bin/activate
@@ -94,7 +94,7 @@ If you already ran `west init` and downloaded the regular Zephyr repo, you need 
   $ git -C zephyr fetch
   ```
   ```bash-session
-  $ git -C zephyr checkout mchp_pic32cx_v420
+  $ git -C zephyr checkout mchp_pic32cxbz_v420
   ```
   ```bash-session
   $ source .venv/bin/activate
@@ -116,7 +116,7 @@ If you already ran `west init` and downloaded the regular Zephyr repo, you need 
   PS C:\Users\...\zephyrproject> git -C zephyr fetch
   ```
   ```ps-session
-  PS C:\Users\...\zephyrproject> git -C zephyr checkout mchp_pic32cx_v420
+  PS C:\Users\...\zephyrproject> git -C zephyr checkout mchp_pic32cxbz_v420
   ```
   ```ps-session
   PS C:\Users\...\zephyrproject> .\.venv\Scripts\Activate.ps1

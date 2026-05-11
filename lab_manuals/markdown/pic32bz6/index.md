@@ -5,33 +5,27 @@ sidebar_label: Overview
 sidebar_position: 1
 ---
 
-# PIC32BZ6  -  Board Overview
+# PIC32-BZ6 Curiosity Board Overview
 
 ## Hardware Requirements
 
 Here is the list of hardware needed to complete the lab:
 
-{/* TODO: replace board name in hardware list (SAME54 XPLAINED PRO → PIC32BZ6 board name) */}
-- The SAME54 XPLAINED PRO
-- 1× Micro-USB cable
+- The PIC32-BZ6 Curiosity Board
+- 1× USB-C cable
 - ATWINC1500-XPRO Extension Board
 
-{/* TODO: replace board image (same54_winc1500_overview.png → correct image for PIC32BZ6 + WINC1500) */}
-![SAME54 XPLAINED PRO with WINC1500 XPRO extension board](/images/same54/winc1500_overview.png)
+![PIC32-BZ6 Curiosity Board with WINC1500 XPRO extension board](/images/pic32-bz6/connections.png)
 
-{/* TODO: replace board description paragraph (ATSAME54P20A → PIC32BZ6 MCU name, update all product-specific details) */}
-The SAM E54 Xplained Pro evaluation kit is a hardware platform for evaluating the ATSAME54P20A
-microcontroller (MCU). Supported by the Studio integrated development platform, the kit provides
-easy access to the features of the ATSAME54P20A and explains how to integrate the device into a
-custom design. This board is supported by MPLAB integrated tools and MPLAB Harmony.
+The PIC32-BZ6 Curiosity Board is a full-featured development platform designed to accelerate evaluation and prototyping with the PIC32-BZ6 family of wireless MCUs. Featuring Bluetooth LE and Thread connectivity, this board brings out the full potential of the PIC32WM-BZ6204UE module and PIC32CX2051BZ62132 SoC making it a good choice for a wide range of connected applications in industrial, automotive and consumer markets.
 
 The ATWINC1500-XPRO is an extension board to the Xplained Pro evaluation platform. The
 ATWINC1500-XPRO extension board allows you to evaluate the ATWINC1500 low cost, low power
 802.11 b/g/n Wi-Fi network controller module.
 
 {/* TODO: replace board connectors/diagram image (same54_connectors_diagram.png → correct image for PIC32BZ6) */}
-![SAME54 XPLAINED PRO board connectors and jumpers diagram](/images/same54/connectors_diagram.png)
+![​​PIC32-BZ6 Curiosity Board board connectors and jumpers diagram](/images/pic32-bz6/kit-overview.png)
 
 More information:
 {/* TODO: replace product page URL (ATSAME54-XPRO → correct PIC32BZ6 product page URL) */}
-[microchip.com  -  ATSAME54-XPRO](https://www.microchip.com/en-us/development-tool/atsame54-xpro)
+[microchip.com  -  ​​PIC32-BZ6 Curiosity Board](https://www.microchip.com/en-us/development-tool/ev31u42a#Documentation)

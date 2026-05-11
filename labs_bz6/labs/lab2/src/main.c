@@ -10,9 +10,6 @@
 #include "producer.h"
 #include "consumer.h"
 
-/* 1000 msec = 1 sec */
-#define SLEEP_TIME_MS   200
-
 /* The devicetree node identifier for the "led0" alias. */
 #define LED0_NODE DT_ALIAS(led0)
 
@@ -40,7 +37,6 @@ char taskCommsBuffer[4 * sizeof(uint32_t)];
 int main(void)
 {
 	int ret;
-	bool led_state = true;
 
 	if (!gpio_is_ready_dt(&led)) {
 		return 0;

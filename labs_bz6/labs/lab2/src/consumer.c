@@ -7,6 +7,6 @@ void consumerThread(void*, void*inMsgQueue, void*){
 
 	while (1) {
            k_msgq_get(notifyMsgQueue, &data, K_FOREVER);
-		printf("(consumer) Received data: %d\n", data);
+		printk("(consumer) Received data: %d\n", data);
 	}
 }

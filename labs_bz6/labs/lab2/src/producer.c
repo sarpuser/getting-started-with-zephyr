@@ -11,7 +11,7 @@ void producerThread(void *inLed, void* inMsgQueue, void*) {
             gpio_pin_toggle_dt(toggleLED);
             led_state = !led_state;
             if(counter++>=10) {
-                  printf("(producer) Putting %d into message queue\n", data);
+                  printk("(producer) Putting %d into message queue\n", data);
 	            k_msgq_put(notifyMsgQueue, &data, K_NO_WAIT);
                   data++;
                   counter = 0;

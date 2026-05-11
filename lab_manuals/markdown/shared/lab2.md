@@ -29,10 +29,6 @@ allow the tasks to access the message queue.
 
 ## Procedure
 
-In the following steps, we’ll complete the following high level actions in order to run a thread in Zephyr:
-
-![Diagram illustrating the lifetime steps of a Zephyr thread](/images/lab2/zephyr_thread_lifetime.png)
-
 :::info
 Along the way in this lab, you may notice some *compiler warnings* when you build.  These are due to the interative nature of this lab. By the time Lab 2 is complete all compiler warnings will
 be cleared!
@@ -176,6 +172,30 @@ struct k_thread producerThread_data;
 ```
 
 #### 2.1.9: Build and flash your new code using `west flash`. The LED should toggle every 100ms. (10Hz)
+
+<Tabs groupId="os">
+  <TabItem value="linux" label="Ubuntu">
+
+  ```bash-session
+  (.venv) $ west flash %FLASH_ARGS_LINUX%
+  ```
+
+  </TabItem>
+  <TabItem value="macos" label="macOS">
+
+  ```bash-session
+  (.venv) $ west flash %FLASH_ARGS_MACOS%
+  ```
+
+  </TabItem>
+  <TabItem value="windows" label="Windows">
+
+  ```ps-session
+  (.venv) PS C:\...\zephyrproject> west flash %FLASH_ARGS_WIN%
+  ```
+
+  </TabItem>
+</Tabs>
 
 :::tip
 You can of course continue to type the full `west build -p always...` command, but it is often
@@ -412,6 +432,8 @@ consumer_tid = k_thread_create(&consumerThread_data,
 ```
 
 #### 2.3.8: Build and flash your code, observing in SerialMonitor that the value of “counter” in `producerThread()` is now delivered to `consumerThread()` via the shared message queue, and  `consumerThread` now prints out the value whenever a new queue item is received.
+
+![Serial monitor showing threads](/images/lab2/serial_monitor_showing_threads.png)
 
 ## Results
 

@@ -151,7 +151,7 @@ Observe the output and success messages from your build, which may resemble the 
 
 ### Step 1.2: Flash the sample application to your target device using *west*
 
-#### 1.2.1: To flash your %BOARD_NAME% with the compiled code, connect your %BOARD_NAME% board with your MicroUSB cable connected to the "Debug USB" port of your target, allow your Operating System to find and mount the device, then type:
+#### 1.2.1: To flash your %BOARD_NAME% board with the compiled code, connect your board with your USB cable connected to the "Debug USB" port of your target, allow your Operating System to find and mount the device, then type:
 
 <Tabs groupId="os">
   <TabItem value="linux" label="Ubuntu">
@@ -218,6 +218,14 @@ You can also use your terminal window and run the following commands:
 
   </TabItem>
 </Tabs>
+
+Your folder structure should now look like this:
+
+![Folder structure](/images/lab1/dir_structure.png)
+
+:::tip
+When working on your own projects, you can structure your working directory however you want. For this class, we will assume that your application code is in `application/`.
+:::
 
 #### 1.3.2: Build this Blinky code in its new location:
 
@@ -310,6 +318,10 @@ code doesn't seem to be running as intended, try a pristine build again.
 
   </TabItem>
 </Tabs>
+
+:::tip
+You can use the **up arrow key** to cycle through old commands you've run. This way, you don't have to type the commands each time.
+:::
 
 #### 1.3.6: In a **new terminal window** (**Terminal → New Terminal**), select the "SERIAL MONITOR" tab and connect to the serial port (Start Monitoring) of the device (EDBG Virtual COM Port) to see print statements from our `main()` loop.
 

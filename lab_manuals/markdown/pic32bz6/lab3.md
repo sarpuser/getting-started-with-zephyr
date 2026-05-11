@@ -35,42 +35,42 @@ the `sercom4_spi_xpro` pinctrl node defined in the board support package — you
 need to list them as individual GPIOs in the overlay.
 :::
 
-#### 3.2.2: Create a `boards/` directory inside your project root and create the overlay file:
+#### 3.2.2: Create a `boards/` directory inside your `application` directory and create the overlay file:
 
 <Tabs groupId="os">
   <TabItem value="linux" label="Ubuntu">
 
   ```bash-session
-  (.venv) $ mkdir -p boards
+  (.venv) $ mkdir -p application/boards
   ```
   ```bash-session
-  (.venv) $ touch boards/%BOARD%.overlay
+  (.venv) $ touch application/boards/%BOARD%.overlay
   ```
 
   </TabItem>
   <TabItem value="macos" label="macOS">
 
   ```bash-session
-  (.venv) $ mkdir -p boards
+  (.venv) $ mkdir -p application/boards
   ```
   ```bash-session
-  (.venv) $ touch boards/%BOARD%.overlay
+  (.venv) $ touch application/boards/%BOARD%.overlay
   ```
 
   </TabItem>
   <TabItem value="windows" label="Windows">
 
   ```ps-session
-  (.venv) PS C:\...\zephyrproject> mkdir boards
+  (.venv) PS C:\...\zephyrproject> mkdir application\boards
   ```
   ```ps-session
-  (.venv) PS C:\...\zephyrproject> ni boards\%BOARD%.overlay
+  (.venv) PS C:\...\zephyrproject> ni application\boards\%BOARD%.overlay
   ```
 
   </TabItem>
 </Tabs>
 
-#### 3.2.3: Open `boards/%BOARD%.overlay` and add the following Device Tree content to configure SERCOM4 as an SPI bus and attach the WINC1500 as a device on that bus:
+#### 3.2.3: Open `application/boards/%BOARD%.overlay` and add the following Device Tree content to configure SERCOM4 as an SPI bus and attach the WINC1500 as a device on that bus:
 
 ```dts
 / {

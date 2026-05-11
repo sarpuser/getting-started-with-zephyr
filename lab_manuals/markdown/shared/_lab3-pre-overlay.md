@@ -51,13 +51,12 @@ In `consumer.c`:
 
 #### 3.1.3: Build and flash the updated firmware:
 
-```bash-session
-(.venv) $ west build -p always -b %BOARD% application
-```
-
 <Tabs groupId="os">
   <TabItem value="linux" label="Ubuntu">
 
+  ```bash-session
+  (.venv) $ west build -p always -b %BOARD% application
+  ```
   ```bash-session
   (.venv) $ west flash %FLASH_ARGS_LINUX%
   ```
@@ -66,12 +65,18 @@ In `consumer.c`:
   <TabItem value="macos" label="macOS">
 
   ```bash-session
+  (.venv) $ west build -p always -b %BOARD% application
+  ```
+  ```bash-session
   (.venv) $ west flash %FLASH_ARGS_MACOS%
   ```
 
   </TabItem>
   <TabItem value="windows" label="Windows">
 
+  ```ps-session
+  (.venv) PS C:\...\zephyrproject> west build -p always -b %BOARD% application
+  ```
   ```ps-session
   (.venv) PS C:\...\zephyrproject> west flash %FLASH_ARGS_WIN%
   ```
@@ -106,7 +111,7 @@ will appear here.
 #### 3.1.6: List all active Zephyr threads and their current state, priority, and stack usage:
 
 ```bash-session
-uart:~$ kernel threads
+uart:~$ kernel thread list
 ```
 
 ![Shell output of kernel threads showing auto-generated numeric thread names](/images/lab3/shell_thread_list_before.png)
@@ -117,46 +122,42 @@ next step will make them easier to identify.
 #### 3.1.7: Open `main.c` and add the following two calls immediately after the `k_thread_create` calls for the producer and consumer threads:
 
 ```c
-k_thread_name_set(producer_tid, (const char *)"producer");
-k_thread_name_set(consumer_tid, (const char *)"consumer");
+	k_tid_t producer_tid = k_thread_create(&producerThread_data,
+                         producerThreadstack_area,
+                         K_THREAD_STACK_SIZEOF(producerThreadstack_area),
+                         producerThread,
+                         (void*)&led, (void*)&consumerQueue, (void*)NULL,
+                         PRIORITY, 0, K_NO_WAIT);
+
+	k_tid_t consumer_tid = k_thread_create(&consumerThread_data,
+                          consumerThreadstack_area,
+                          K_THREAD_STACK_SIZEOF(consumerThreadstack_area),
+                          consumerThread,
+                          (void*)NULL, (void*)&consumerQueue, (void*)NULL,
+                          PRIORITY, 0, K_NO_WAIT);
+
+  // add-start
+	k_thread_name_set(producer_tid, (const char *)"producer");
+	k_thread_name_set(consumer_tid, (const char *)"consumer");
+  // add-end
+
+	while (1) {
+		k_msleep(SLEEP_TIME_MS);
+	}
 ```
 
-#### 3.1.8: Rebuild, flash, and rerun `kernel threads` in the shell. The producer and consumer threads should now appear with their human-readable names.
+#### 3.1.8: Rebuild, flash, and rerun `kernel thread list` in the shell. The producer and consumer threads should now appear with their human-readable names.
 
 ```bash-session
-(.venv) $ west build
+uart:~$ kernel thread list
 ```
-
-<Tabs groupId="os">
-  <TabItem value="linux" label="Ubuntu">
-
-  ```bash-session
-  (.venv) $ west flash %FLASH_ARGS_LINUX%
-  ```
-
-  </TabItem>
-  <TabItem value="macos" label="macOS">
-
-  ```bash-session
-  (.venv) $ west flash %FLASH_ARGS_MACOS%
-  ```
-
-  </TabItem>
-  <TabItem value="windows" label="Windows">
-
-  ```ps-session
-  (.venv) PS C:\...\zephyrproject> west flash %FLASH_ARGS_WIN%
-  ```
-
-  </TabItem>
-</Tabs>
 
 ![Shell output of kernel threads after naming, showing producer and consumer thread names](/images/lab3/shell_thread_list_after.png)
 
 #### 3.1.9: CHALLENGE  -  Stack Usage Analysis
 
 :::info
-While looking at the `kernel threads` output, examine the **unused stack** column for your
+While looking at the `kernel thread list` output, examine the **unused stack** column for your
 producer and consumer threads. The `STACKSIZE` macro in `main.c` is currently set to 1024 bytes
 for both threads.
 

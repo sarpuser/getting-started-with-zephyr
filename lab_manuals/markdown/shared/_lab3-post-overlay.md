@@ -104,17 +104,10 @@ channels, and security modes will be printed to the console.
 
 ![Shell wifi scan output showing discovered access points with SSID, channel, and security info](/images/lab3/shell_wifi_scan.png)
 
-#### 3.3.2: Connect to your access point by supplying the SSID and passphrase. The full command syntax is:
+#### 3.3.2: Connect to `RTOS1` wifi network using the passphrase `zephyr4microchip`. The full command syntax is:
 
 ```bash-session
-uart:~$ wifi connect -s <SSID> -p <passphrase> -k <security>
-```
-
-Replace `<SSID>`, `<passphrase>`, and `<security>` with your network details. For a typical
-WPA2-PSK network (`-k 1`):
-
-```bash-session
-uart:~$ wifi connect -s "YourSSID" -p "YourPassword" -k 1
+uart:~$ wifi connect -s RTOS1 -p zephyr4microchip -k 1
 ```
 
 The `-k 1` flag selects WPA2-PSK security. The shell will print a connection status event when
@@ -128,35 +121,32 @@ uart:~$ net ipv4
 
 ![Shell net ipv4 output showing the assigned IPv4 address on the Wi-Fi interface](/images/lab3/shell_net_ipv4.png)
 
-Because `CONFIG_NET_DHCPV4=n` is set in `prj.conf` for this lab, a static address may need to
-be configured depending on your network setup. Confirm that the address shown is reachable from
-your host machine.
-
 #### 3.3.4: Inspect the network interface to confirm the Wi-Fi link is up:
 
 ```bash-session
 uart:~$ net iface
 ```
 
-#### 3.3.5: Ping a host on your local network to verify end-to-end connectivity:
-
-```bash-session
-uart:~$ net ping 192.168.1.1
-```
-
-#### 3.3.6: Send a UDP packet to a listening host using the network shell:
-
-```bash-session
-uart:~$ net udp send 192.168.0.100 8085 "Hello from YourName"
-```
+![Shell net iface showing the wifi interface](/images/lab3/shell_net_iface.png)
 
 :::info
-Replace `192.168.0.100` with the IP address of a machine on your network that is listening on
-UDP port 8085. You can open a listener on a host PC with:
 
-```bash
-nc -u -l 8085
+The gateway IP displays as 0.0.0.0 because the full IP stack, including routing and gateway assignment, is offloaded to the WINC1500 module, so Zephyr's network interface is never populated with the gateway address.
+
+:::
+
+#### 3.3.5: Send a UDP packet to a listening host using the network shell:
+
+```bash-session
+uart:~$ net udp send 172.26.14.102 56335 "Hello from YourName"
 ```
+
+You should now see your name on the UDP listener on the screen!
+
+:::info
+
+Even if your name appears on the presentation screen, the UART shell will still report that the UDP send failed. The packet was actually transmitted successfully, but the WINC1500 send complete callback is not implemented, so Zephyr is never notified of the successful send.
+
 :::
 
 ## Results

@@ -45,10 +45,10 @@
 		compatible = "atmel,winc1500";
 		reg = <0>;
 		spi-max-frequency = <12000000>;
-		irq-gpios    = <&portb 0  GPIO_ACTIVE_LOW>;  /* XPRO pin  9 – RPB0  */
-		reset-gpios  = <&portb 15 GPIO_ACTIVE_LOW>;  /* XPRO pin  4 – RPB15 */
-		enable-gpios = <&portd 2  GPIO_ACTIVE_HIGH>,  /* XPRO pin  6 – RPD2  CHIP_EN */
-		               <&portd 4  GPIO_ACTIVE_HIGH>;  /* XPRO pin  3 – RPD4  WAKE    */
+		irq-gpios    = <&portb 0  GPIO_ACTIVE_LOW>;
+		reset-gpios  = <&portb 14 GPIO_ACTIVE_LOW>;
+		enable-gpios = <&portd 2  GPIO_ACTIVE_HIGH>,
+		               <&portd 5  GPIO_ACTIVE_HIGH>;
 		status = "okay";
 	};
 };

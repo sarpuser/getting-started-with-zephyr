@@ -20,106 +20,77 @@ headers. The table below shows the relevant signal mappings for the EXT1 connect
 used in this lab). An EXT3 alternative is provided in the collapsible section after the overlay
 listing.
 
-:::warning Board-specific content
-The pin mapping table, overlay peripheral names, and GPIO pin numbers below are specific to
-the SAME54 Xplained Pro. If you are working with a different board, replace these values with the
-correct peripheral (e.g. SERCOMx), pinctrl reference, and port/pin numbers for your hardware.
-:::
-
-| WINC1500 Signal  | EXT1 Pin | SAME54 Xplained Pro Port/Pin |
+| WINC1500 Signal  | XPRO Pin | SAME54 Xplained Pro Port/Pin |
 |------------------|----------|------------------------------|
-| SPI CS           | 15       | PB28                         |
-| SPI MOSI         | 16       | *(pinctrl)*                  |
-| SPI MISO         | 17       | *(pinctrl)*                  |
-| SPI SCK          | 18       | *(pinctrl)*                  |
+| RESET            | 5        | PA6                          |
+| WAKE             | 6        | PA7                          |
 | IRQ              | 9        | PB7                          |
-| RESET            | 10       | PA6                          |
-| ENABLE (CHIP EN) | 11       | PA7                          |
-| ENABLE (VCC EN)  | 12       | PA27                         |
+| CHIP ENABLE      | 10       | PA27                         |
+| SPI CS           | 15       | PB28                         |
 
-:::info
-SPI MOSI, MISO, and SCK are managed automatically by the SERCOM4 SPI peripheral through
-the `sercom4_spi_default` pinctrl node defined in the board support package — you do not
-need to list them as individual GPIOs in the overlay.
-:::
-
-#### 3.2.2: Create a `boards/` directory inside your project root and create the overlay file:
+#### 3.2.2: Create a `boards/` directory inside your `application` directory and create the overlay file:
 
 <Tabs groupId="os">
   <TabItem value="linux" label="Ubuntu">
 
   ```bash-session
-  (.venv) $ mkdir -p boards
+  (.venv) $ mkdir -p application/boards
   ```
   ```bash-session
-  (.venv) $ touch boards/%BOARD%.overlay
+  (.venv) $ touch application/boards/%BOARD%.overlay
   ```
 
   </TabItem>
   <TabItem value="macos" label="macOS">
 
   ```bash-session
-  (.venv) $ mkdir -p boards
+  (.venv) $ mkdir -p application/boards
   ```
   ```bash-session
-  (.venv) $ touch boards/%BOARD%.overlay
+  (.venv) $ touch application/boards/%BOARD%.overlay
   ```
 
   </TabItem>
   <TabItem value="windows" label="Windows">
 
   ```ps-session
-  (.venv) PS C:\...\zephyrproject> mkdir boards
+  (.venv) PS C:\...\zephyrproject> mkdir application\boards
   ```
   ```ps-session
-  (.venv) PS C:\...\zephyrproject> ni boards\%BOARD%.overlay
+  (.venv) PS C:\...\zephyrproject> ni application\boards\%BOARD%.overlay
   ```
 
   </TabItem>
 </Tabs>
 
-#### 3.2.3: Open `boards/%BOARD%.overlay` and add the following Device Tree content to configure SERCOM4 as an SPI bus and attach the WINC1500 as a device on that bus:
+#### 3.2.3: Open `application/boards/%BOARD%.overlay` and add the following Device Tree content to switch SERCOM4 to the XPRO header pins and attach the WINC1500 as a device on that bus:
 
 ```dts
-/
-{
-    aliases {
-    };
-};
-
-&gmac {
-    status = "disabled";
-};
-
 &sercom4 {
-    compatible = "atmel,sam0-spi";
-    dipo = <3>;
-    dopo = <0>;
-    #address-cells = <1>;
-    #size-cells = <0>;
+    pinctrl-0 = <&sercom4_spi_xpro>;
+    // bold-next-line
     cs-gpios = <&portb 28 GPIO_ACTIVE_LOW>;
-    pinctrl-0 = <&sercom4_spi_default>;
-    pinctrl-names = "default";
-    status = "okay";
 
     sercom4_cs0_winc1500: WINC1500@0 {
         compatible = "atmel,winc1500";
         reg = <0>;
         spi-max-frequency = <12000000>;
+        // bold-start
         irq-gpios    = <&portb 7  GPIO_ACTIVE_LOW>;
-        reset-gpios  = <&porta 6  GPIO_ACTIVE_LOW>;
+        reset-gpios  = <&porta 6 GPIO_ACTIVE_LOW>;
         enable-gpios = <&porta 7  GPIO_ACTIVE_HIGH>,
-                       <&porta 27 GPIO_ACTIVE_HIGH>;
+                       <&porta 27  GPIO_ACTIVE_HIGH>;
+        // bold-end
         status = "okay";
     };
 };
 ```
 
 :::info
-`&gmac` is disabled because the GMAC Ethernet peripheral shares pins with the EXT1 SPI signals
-on the SAME54 Xplained Pro. Disabling it in the overlay releases those pins for use by SERCOM4.
+`enable-gpios` lists two pins, comma separated.  Since the CHIP_EN pin and the WAKE pin largely share functionality for our demo, listing them both allows the software driver to toggle them together when the chip is enabled or disabled.  You could also use a Devicetree GPIO node to configure the WAKE pin separately to manage it on your own.
 :::
 
+<!-- FIXME: Validate EXT3 headings -->
 <details>
 <summary>Alternative: EXT3 overlay (SERCOM6)</summary>
 

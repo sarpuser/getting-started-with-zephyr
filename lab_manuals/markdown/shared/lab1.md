@@ -81,7 +81,7 @@ Environment (VENV) and use this terminal to issue “west” commands to build a
   When complete, your terminal prompt will include the name of your virtual environment:
 
   ```bash-session
-  (.venv) $
+  (.venv) $ .
   ```
 
   </TabItem>
@@ -94,7 +94,7 @@ Environment (VENV) and use this terminal to issue “west” commands to build a
   When complete, your terminal prompt will include the name of your virtual environment:
 
   ```bash-session
-  (.venv) $
+  (.venv) $ .
   ```
 
   </TabItem>

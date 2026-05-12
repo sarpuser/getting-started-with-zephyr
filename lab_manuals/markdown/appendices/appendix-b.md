@@ -42,7 +42,7 @@ Debugging is an important tool for embedded development. Zephyr and VSCode offer
 <TabItem value="windows" label="Windows">
 
 ```powershell
-(.venv) C:\...\mastersproject> west debug
+(.venv) C:\...\zephyrproject> west debug
 ```
 
 </TabItem>

@@ -94,7 +94,7 @@ const MIME = {
 // ---------------------------------------------------------------------------
 
 function normalizeAdmonitionTitles(text) {
-  return text.replace(/^:::([\w]+)(?:\s+(.+))?$/gm, (match, type, title) =>
+  return text.replace(/^:::(\w+)(?:[ \t]+(.+))?$/gm, (match, type, title) =>
     title ? `:::${type}{title="${title}"}` : match
   );
 }
@@ -117,6 +117,70 @@ function rehypeEmbedImages() {
       node.properties.src = `data:${mime};base64,${data}`;
     });
   };
+}
+
+// ---------------------------------------------------------------------------
+// Rehype plugin: wrap h2/h3 heading + immediately following h3/h4 heading
+// in a <div class="keep-with-next"> so break-inside:avoid keeps them together.
+// ---------------------------------------------------------------------------
+
+function rehypeKeepWithNext() {
+  // Sub-headings that should be kept with a given heading level
+  const SUB_HEADINGS = {
+    h2: ['h3', 'h4', 'h5'],
+    h3: ['h4', 'h5'],
+    h4: ['h5'],
+  };
+  // Block elements that h4/h5 should be kept with when directly followed by content
+  const CONTENT_BLOCKS = new Set(['p', 'pre', 'ul', 'ol', 'blockquote', 'table', 'details']);
+
+  return (tree) => {
+    processNode(tree);
+  };
+
+  function processNode(node) {
+    if (!node.children) return;
+    // Don't re-process elements we already wrapped
+    if (node.type === 'element' && node.properties?.className?.includes('keep-with-next')) return;
+
+    // Iterate in reverse so splicing doesn't shift earlier indices
+    for (let i = node.children.length - 2; i >= 0; i--) {
+      const curr = node.children[i];
+      if (curr.type !== 'element') continue;
+      const tag = curr.tagName;
+      if (!['h2', 'h3', 'h4', 'h5'].includes(tag)) continue;
+
+      // Skip the whitespace text node(s) to find the real next sibling
+      let j = i + 1;
+      while (j < node.children.length) {
+        const n = node.children[j];
+        if (n.type !== 'text' || n.value.trim() !== '') break;
+        j++;
+      }
+      if (j >= node.children.length) continue;
+
+      const next = node.children[j];
+      if (next.type !== 'element') continue;
+
+      const isSubHeading = (SUB_HEADINGS[tag] ?? []).includes(next.tagName);
+      const isContentBlock = (tag === 'h4' || tag === 'h5') && CONTENT_BLOCKS.has(next.tagName);
+      if (!isSubHeading && !isContentBlock) continue;
+
+      // Wrap curr through next (including any whitespace nodes between them)
+      const wrapped = node.children.splice(i, j - i + 1);
+      node.children.splice(i, 0, {
+        type: 'element',
+        tagName: 'div',
+        properties: { className: ['keep-with-next'] },
+        children: wrapped,
+      });
+    }
+
+    // Recurse into remaining children
+    for (const child of node.children) {
+      processNode(child);
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -204,6 +268,7 @@ function processSourceFile(filePath, board, targetOs) {
     .use(rehypePrism, { ignoreMissing: true })
     .use(rehypeShellPrompts)
     .use(rehypeAnnotateLines)
+    .use(rehypeKeepWithNext)
     .use(rehypeStringify, { allowDangerousHtml: true })
     .processSync(file);
 

@@ -156,7 +156,6 @@ uart:~$ kernel thread list
 
 #### 3.1.9: CHALLENGE  -  Stack Usage Analysis
 
-:::info
 While looking at the `kernel thread list` output, examine the **unused stack** column for your
 producer and consumer threads. The `STACKSIZE` macro in `main.c` is currently set to 1024 bytes
 for both threads.
@@ -165,6 +164,5 @@ Consider: is 1024 bytes the right size? If the unused stack is very large you ar
 If it is very small the thread is at risk of a stack overflow. Try reducing `STACKSIZE` for
 one or both threads and observe whether the firmware still builds and runs correctly. What is
 the minimum safe stack size for each thread?
-:::
 
 ---

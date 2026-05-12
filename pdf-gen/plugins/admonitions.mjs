@@ -31,11 +31,12 @@ const ICONS = {
 export function remarkAdmonitions() {
   return (tree) => {
     visit(tree, 'containerDirective', (node) => {
+      // Skip nodes already processed (e.g. from an imported file's pipeline run)
+      if (node.data?.hName === 'div') return;
       const type = node.name;
       const icon = ICONS[type] ?? 'ℹ';
-      const label =
-        node.attributes?.title ??
-        type.charAt(0).toUpperCase() + type.slice(1);
+      // Always use just the type as title, never use custom titles
+      const label = type.charAt(0).toUpperCase() + type.slice(1);
 
       // Tell remark-rehype to render this node as a <div>
       node.data = {

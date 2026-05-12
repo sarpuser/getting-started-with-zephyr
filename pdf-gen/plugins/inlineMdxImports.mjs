@@ -22,13 +22,15 @@ export function remarkResolveMdxImports({ processImportedFile }) {
     const fileDir = path.dirname(file.path ?? '');
 
     // 1. Collect .md imports: componentName → absolutePath
+    // Use matchAll (with /g) because remark-mdx groups all import statements
+    // into a single mdxjsEsm node — match() without /g would only capture the first.
     const importMap = {};
     visit(tree, 'mdxjsEsm', (node) => {
-      const match = node.value?.match(
-        /import\s+(\w+)\s+from\s+['"]([^'"]+\.md)['"]/
-      );
-      if (match) {
-        importMap[match[1]] = path.resolve(fileDir, match[2]);
+      const matches = node.value?.matchAll(
+        /import\s+(\w+)\s+from\s+['"]([^'"]+\.md)['"]/g
+      ) ?? [];
+      for (const m of matches) {
+        importMap[m[1]] = path.resolve(fileDir, m[2]);
       }
     });
 

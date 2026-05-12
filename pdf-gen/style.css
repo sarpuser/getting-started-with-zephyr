@@ -157,17 +157,32 @@ h4 {
 
 /* Prevent orphaned headings — keep at least the first line of content
    on the same page as its heading */
-h1, h2, h3, h4 {
+h1, h2, h3, h4, h5, h6 {
   break-after: avoid;
   page-break-after: avoid;
 }
 
+/* Structural keep-with-next wrapper (injected by rehypeKeepWithNext):
+   wraps a heading with the immediately following sub-heading or first
+   content block so that pagedjs's break-inside:avoid holds them together. */
+.keep-with-next {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
 /* ── Code ─────────────────────────────────────────────────── */
-/* Keep a paragraph that immediately precedes a code block on the same page */
-p + pre,
-p + div > pre {
-  break-before: avoid;
-  page-break-before: avoid;
+/* Prevent a paragraph before a code block or image from being orphaned.
+   break-after:avoid on the paragraph pushes it to the next page with its
+   following content rather than leaving it stranded at the bottom alone. */
+p:has(+ pre),
+p:has(+ div > pre) {
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+p:has(+ p > img) {
+  break-after: avoid;
+  page-break-after: avoid;
 }
 
 pre {

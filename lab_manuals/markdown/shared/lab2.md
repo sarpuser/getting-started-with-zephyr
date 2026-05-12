@@ -197,13 +197,6 @@ struct k_thread producerThread_data;
   </TabItem>
 </Tabs>
 
-:::tip
-You can of course continue to type the full `west build -p always...` command, but it is often
-quicker to just run `west flash`.  West is generally smart enough to know when code has
-changed and recompile as necessary, then flash the resulting compiled code.  If you ever find
-that newly added code doesn’t seem to be running as intended, try a pristine build again.y.
-:::
-
 ---
 
 ### Step 2.2: Create a Consumer Thread
@@ -442,7 +435,4 @@ Message Queue to deliver data from one to the other!
 
 ## Summary
 
-Learning to manage tasks and inter-task communication are important steps to building your RTOS
-application. In this Lab you created two tasks and learned to pass data between them. There are many other
-ways to pass data among tasks including Semaphores, Events, Pipes, and more. Browse the ZephyrOS API
-docs for more information and usage!
+Managing tasks and inter-task communication are essential skills for building RTOS applications. In this lab you created two tasks and passed data between them using a message queue. Zephyr also supports many other communication methods. Browse the Zephyr API docs to learn more!

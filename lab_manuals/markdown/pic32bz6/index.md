@@ -1,5 +1,4 @@
 ---
-# TODO: replace board name in title (SAME54 → PIC32BZ6 board name)
 title: "PIC32BZ6  -  Board Overview"
 sidebar_label: Overview
 sidebar_position: 1
@@ -23,9 +22,7 @@ The ATWINC1500-XPRO is an extension board to the Xplained Pro evaluation platfor
 ATWINC1500-XPRO extension board allows you to evaluate the ATWINC1500 low cost, low power
 802.11 b/g/n Wi-Fi network controller module.
 
-{/* TODO: replace board connectors/diagram image (same54_connectors_diagram.png → correct image for PIC32BZ6) */}
 ![​​PIC32-BZ6 Curiosity Board board connectors and jumpers diagram](/images/pic32-bz6/kit-overview.png)
 
 More information:
-{/* TODO: replace product page URL (ATSAME54-XPRO → correct PIC32BZ6 product page URL) */}
 [microchip.com  -  ​​PIC32-BZ6 Curiosity Board](https://www.microchip.com/en-us/development-tool/ev31u42a#Documentation)

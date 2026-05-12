@@ -90,7 +90,7 @@ listing.
 `enable-gpios` lists two pins, comma separated.  Since the CHIP_EN pin and the WAKE pin largely share functionality for our demo, listing them both allows the software driver to toggle them together when the chip is enabled or disabled.  You could also use a Devicetree GPIO node to configure the WAKE pin separately to manage it on your own.
 :::
 
-<!-- FIXME: Validate EXT3 headings -->
+{/* FIXME: Validate EXT3 headings */}
 <details>
 <summary>Alternative: EXT3 overlay (SERCOM6)</summary>
 

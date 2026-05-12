@@ -26,7 +26,7 @@ Zephyr support for this board has not yet been released to the main Zephyr repo.
   $ git -C zephyr fetch
   ```
   ```bash-session
-  $ git -C zephyr checkout mchp_pic32cx_v420
+  $ git -C zephyr checkout mchp_pic32cxbz_v420
   ```
   ```bash-session
   $ source .venv/bin/activate
@@ -35,7 +35,7 @@ Zephyr support for this board has not yet been released to the main Zephyr repo.
   (.venv) $ west update
   ```
   ```bash-session
-  (.venv) $ west blob fetch hal_microchip
+  (.venv) $ west blobs fetch hal_microchip
   ```
 
   </TabItem>
@@ -48,7 +48,7 @@ Zephyr support for this board has not yet been released to the main Zephyr repo.
   $ git -C zephyr fetch
   ```
   ```bash-session
-  $ git -C zephyr checkout mchp_pic32cx_v420
+  $ git -C zephyr checkout mchp_pic32cxbz_v420
   ```
   ```bash-session
   $ source .venv/bin/activate
@@ -57,7 +57,7 @@ Zephyr support for this board has not yet been released to the main Zephyr repo.
   (.venv) $ west update
   ```
   ```bash-session
-  (.venv) $ west blob fetch hal_microchip
+  (.venv) $ west blobs fetch hal_microchip
   ```
 
   </TabItem>
@@ -79,7 +79,7 @@ Zephyr support for this board has not yet been released to the main Zephyr repo.
   (.venv) PS C:\Users\...\zephyrproject> west update
   ```
   ```ps-session
-  (.venv) PS C:\Users\...\zephyrproject> west blob fetch hal_microchip
+  (.venv) PS C:\Users\...\zephyrproject> west blobs fetch hal_microchip
   ```
 
   </TabItem>

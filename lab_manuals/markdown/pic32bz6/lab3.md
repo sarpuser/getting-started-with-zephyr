@@ -64,6 +64,16 @@ import PostOverlay from './_lab3-post-overlay.md';
 #### 3.2.3: Open `application/boards/%BOARD%.overlay` and add the following Device Tree content to switch SERCOM4 to the XPRO header pins and attach the WINC1500 as a device on that bus:
 
 ```dts
+&pinctrl {
+    sercom4_spi_xpro: sercom4_spi_xpro {
+        group1 {
+            pinmux = <PE5_SCOM4P1_OUT>,   /* SCK  – PAD1 */
+                    <PB3_SCOM4P3_OUT>,   /* MOSI – PAD3 */
+                    <PA4_SCOM4P0_IN>;    /* MISO – PAD0 */
+        };
+    };
+};
+
 &sercom4 {
     pinctrl-0 = <&sercom4_spi_xpro>;
     // bold-next-line

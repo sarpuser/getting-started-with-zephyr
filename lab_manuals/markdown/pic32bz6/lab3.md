@@ -23,6 +23,7 @@ import PostOverlay from './_lab3-post-overlay.md';
 | WAKE            | 6        | RPD2               |
 | IRQ             | 9        | RPB0               |
 | CHIP_EN         | 10       | RPD3               |
+| CHIP_SELECT     | 15       | RPB1               |
 
 
 #### 3.2.2: Create a `boards/` directory inside your `application` directory and create the overlay file:
@@ -65,6 +66,7 @@ import PostOverlay from './_lab3-post-overlay.md';
 ```dts
 &sercom4 {
     pinctrl-0 = <&sercom4_spi_xpro>;
+    // bold-next-line
     cs-gpios = <&portb 1 GPIO_ACTIVE_LOW>;
 
     sercom4_cs0_winc1500: WINC1500@0 {

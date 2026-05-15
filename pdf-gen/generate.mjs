@@ -16,7 +16,8 @@
  *      remark-frontmatter + remark-directive
  *   3. Remark transforms (AST visitors):
  *      remarkResolveMdxImports → remarkFilterOs → remarkBoardVars →
- *      remarkAdmonitions → remarkMagicComments → remarkCleanupMdx →
+ *      remarkAdmonitions → remarkMagicComments → remarkPdfPageBreaks →
+ *      remarkCleanupMdx →
  *      remarkCollectH1s (adds id attrs + collects headings for TOC)
  *   4. remark-rehype (mdast → hast)
  *   5. Rehype transforms: rehypeEmbedImages → rehype-prism-plus → rehypeAnnotateLines
@@ -215,6 +216,22 @@ function remarkCollectH1s({ headingsArr }) {
 }
 
 // ---------------------------------------------------------------------------
+// Remark plugin: convert PDF-only MDX comments to page-break elements
+// ---------------------------------------------------------------------------
+
+function remarkPdfPageBreaks() {
+  return (tree) => {
+    visit(tree, 'mdxFlowExpression', (node, index, parent) => {
+      if (!parent || node.value?.trim() !== '/* pdf-page-break */') return;
+      parent.children[index] = {
+        type: 'html',
+        value: '<div class="pdf-page-break"></div>',
+      };
+    });
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Unified processor factory
 // ---------------------------------------------------------------------------
 
@@ -247,6 +264,7 @@ function createTransformProcessor(board, targetOs) {
     .use(remarkBoardVars, { vars: config.versions.boards[board]?.vars ?? {} })
     .use(remarkAdmonitions)
     .use(remarkMagicComments)
+    .use(remarkPdfPageBreaks)
     .use(remarkCleanupMdx);
 }
 

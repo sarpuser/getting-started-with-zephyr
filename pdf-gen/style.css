@@ -295,6 +295,13 @@ hr {
   height: 0;
 }
 
+.pdf-page-break {
+  break-after: page;
+  page-break-after: always;
+  margin: 0;
+  height: 0;
+}
+
 /* ── Shell session prompt styling ─────────────────────────── */
 /* rehype-prism-plus emits <span class="token prompt"> for our custom
    bash-session / ps-session languages. Mute it so the command stands out. */

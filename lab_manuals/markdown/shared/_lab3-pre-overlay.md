@@ -154,6 +154,8 @@ uart:~$ kernel thread list
 
 ![Shell output of kernel threads after naming, showing producer and consumer thread names](/images/lab3/shell_thread_list_after.png)
 
+{/* pdf-page-break */}
+
 #### 3.1.9: CHALLENGE  -  Stack Usage Analysis
 
 While looking at the `kernel thread list` output, examine the **unused stack** column for your

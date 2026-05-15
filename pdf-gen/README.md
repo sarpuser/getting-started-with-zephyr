@@ -45,6 +45,7 @@ Each source file is processed through:
    - `boardVars` — replaces `%VAR%` tokens with board-specific values
    - `admonitions` — converts `:::type{title="..."}` containers to styled divs
    - `stripMagicComments` — processes code block line annotations
+   - `pdfPageBreaks` — converts `{/* pdf-page-break */}` markers to PDF page breaks
    - `cleanupMdx` — removes remaining MDX AST nodes
    - `collectH1s` — adds `id` attributes to headings, collects TOC data
 4. **remark-rehype** — converts Markdown AST to HTML AST
@@ -63,6 +64,16 @@ Each source file is processed through:
 | `plugins/filterOs.mjs` | OS tab filtering |
 | `plugins/inlineMdxImports.mjs` | MDX import resolution |
 | `plugins/admonitions.mjs` | Admonition rendering |
+
+## PDF-Only Page Breaks
+
+Add this marker anywhere in the Markdown/MDX source to force a page break in the generated PDF:
+
+```md
+{/* pdf-page-break */}
+```
+
+Docusaurus treats the marker as an MDX comment, so it does not render on the website. The PDF generator converts it to a hidden page-break element before pagedjs renders the PDF.
 
 ## System Chrome
 

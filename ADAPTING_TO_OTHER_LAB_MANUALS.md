@@ -194,6 +194,17 @@ Advanced features that are available but entirely optional:
 | OS tabs | `<Tabs><TabItem value="linux">` | Per-OS content variants |
 | MDX component imports | `import X from './_part.md'` | Reusable content sections |
 | Code annotations | `// highlight-next-line` | Line-level code highlighting in PDFs |
+| PDF-only page breaks | `{/* pdf-page-break */}` | Force a page break in PDFs without rendering anything on the website |
+
+### PDF-only page breaks
+
+Use an MDX comment marker when you need to force a page break at a specific point in the PDF:
+
+```md
+{/* pdf-page-break */}
+```
+
+Docusaurus treats this as a comment, so nothing appears on the website. The PDF generator converts it to a page-break element before rendering with pagedjs.
 
 ### Folder structure
 
@@ -255,4 +266,3 @@ Run: `west flash --board %BOARD_ID% %FLASH_CMD%`
 ```
 
 Tokens that don't match any key are left unchanged.
-

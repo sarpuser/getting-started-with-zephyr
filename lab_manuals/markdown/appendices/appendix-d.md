@@ -26,7 +26,7 @@ Instead of running `west init` to download the main Zephyr repo, it is possible 
   (.venv) $ west init -m https://github.com/Zephyr4Microchip/zephyr.git --mr mchp_pic32cxbz_v420
   ```
   ```bash-session
-  (.venv) $ west blob fetch hal_microchip
+  (.venv) $ west blobs fetch hal_microchip
   ```
 
   </TabItem>
@@ -39,7 +39,7 @@ Instead of running `west init` to download the main Zephyr repo, it is possible 
   (.venv) $ west init -m https://github.com/Zephyr4Microchip/zephyr.git --mr mchp_pic32cxbz_v420
   ```
   ```bash-session
-  (.venv) $ west blob fetch hal_microchip
+  (.venv) $ west blobs fetch hal_microchip
   ```
 
   </TabItem>
@@ -52,7 +52,7 @@ Instead of running `west init` to download the main Zephyr repo, it is possible 
   (.venv) PS C:\Users\...\zephyrproject> west init -m https://github.com/Zephyr4Microchip/zephyr.git --mr mchp_pic32cxbz_v420
   ```
   ```ps-session
-  (.venv) PS C:\Users\...\zephyrproject> west blob fetch hal_microchip
+  (.venv) PS C:\Users\...\zephyrproject> west blobs fetch hal_microchip
   ```
 
   </TabItem>
@@ -81,7 +81,7 @@ If you already ran `west init` and downloaded the regular Zephyr repo, you need 
   (.venv) $ west update
   ```
   ```bash-session
-  (.venv) $ west blob fetch hal_microchip
+  (.venv) $ west blobs fetch hal_microchip
   ```
 
   </TabItem>
@@ -103,7 +103,7 @@ If you already ran `west init` and downloaded the regular Zephyr repo, you need 
   (.venv) $ west update
   ```
   ```bash-session
-  (.venv) $ west blob fetch hal_microchip
+  (.venv) $ west blobs fetch hal_microchip
   ```
 
   </TabItem>
@@ -125,7 +125,7 @@ If you already ran `west init` and downloaded the regular Zephyr repo, you need 
   (.venv) PS C:\Users\...\zephyrproject> west update
   ```
   ```ps-session
-  (.venv) PS C:\Users\...\zephyrproject> west blob fetch hal_microchip
+  (.venv) PS C:\Users\...\zephyrproject> west blobs fetch hal_microchip
   ```
 
   </TabItem>

@@ -104,7 +104,7 @@ channels, and security modes will be printed to the console.
 
 ![Shell wifi scan output showing discovered access points with SSID, channel, and security info](/images/lab3/shell_wifi_scan.png)
 
-#### 3.3.2: Connect to `RTOS1` wifi network using the passphrase `zephyr4microchip`. The full command syntax is:
+#### 3.3.2: Connect to `RTOS1` wifi network using the passphrase `zephyr4microchip`.
 
 ```bash-session
 uart:~$ wifi connect -s RTOS1 -p zephyr4microchip -k 1

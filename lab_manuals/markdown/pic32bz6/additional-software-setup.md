@@ -70,7 +70,7 @@ Zephyr support for this board has not yet been released to the main Zephyr repo.
   PS C:\Users\...\zephyrproject> git -C zephyr fetch
   ```
   ```ps-session
-  PS C:\Users\...\zephyrproject> git -C zephyr checkout mchp_pic32cx_v420
+  PS C:\Users\...\zephyrproject> git -C zephyr checkout mchp_pic32cxbz_v420
   ```
   ```ps-session
   PS C:\Users\...\zephyrproject> .\.venv\Scripts\Activate.ps1
@@ -94,6 +94,8 @@ Adding new board support to the upstream OpenOCD release takes time. Microchip p
 
   ```bash-session
   $ cd ~/zephyrproject
+  ```
+  ```bash-session
   $ git clone https://github.com/MicrochipTech/openOCD-wireless
   ```
 
@@ -102,6 +104,8 @@ Adding new board support to the upstream OpenOCD release takes time. Microchip p
 
   ```bash-session
   $ cd ~/zephyrproject
+  ```
+  ```bash-session
   $ git clone https://github.com/MicrochipTech/openOCD-wireless
   ```
 
@@ -110,6 +114,8 @@ Adding new board support to the upstream OpenOCD release takes time. Microchip p
 
   ```ps-session
   PS C:\Users\...> cd C:\Users\...\zephyrproject
+  ```
+  ```ps-session
   PS C:\Users\...\zephyrproject> git clone https://github.com/MicrochipTech/openOCD-wireless
   ```
 

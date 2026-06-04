@@ -7,7 +7,7 @@ There is a bug in the OpenOCD config for the BZ6 that prevents OpenOCD from halt
 1. Download the file `bugfix.patch` and put it at the root of your `zephyrproject` folder.
 2. Run
    ```
-   git -C zephyr apply ../bz6_bugfix/bugfix.patch
+   git -C zephyr apply ../bugfix.patch
    ```
 3. Run
    ```

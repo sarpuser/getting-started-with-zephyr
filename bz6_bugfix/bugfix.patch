@@ -1,0 +1,51 @@
+diff --git a/boards/microchip/pic32wm/pic32wm_bz6204_curiosity/board.cmake b/boards/microchip/pic32wm/pic32wm_bz6204_curiosity/board.cmake
+index d732157407b..1b2c4f698cf 100644
+--- a/boards/microchip/pic32wm/pic32wm_bz6204_curiosity/board.cmake
++++ b/boards/microchip/pic32wm/pic32wm_bz6204_curiosity/board.cmake
+@@ -3,5 +3,10 @@
+ 
+ #board_runner_args(jlink "--device=pic32wm_bz6204" "--speed=4000")
+ 
++board_runner_args(openocd
++  "--hex-file=${CMAKE_BINARY_DIR}/zephyr/zephyr_signed.hex"
++  "--cmd-pre-init=set _HALT_AFTER_RESET 1"
++)
++
+ #include(${ZEPHYR_BASE}/boards/common/jlink.board.cmake)
+ include(${ZEPHYR_BASE}/boards/common/openocd.board.cmake)
+diff --git a/boards/microchip/pic32wm/pic32wm_bz6204_curiosity/support/openocd.cfg b/boards/microchip/pic32wm/pic32wm_bz6204_curiosity/support/openocd.cfg
+index 6534ae1161f..54c114e62c0 100644
+--- a/boards/microchip/pic32wm/pic32wm_bz6204_curiosity/support/openocd.cfg
++++ b/boards/microchip/pic32wm/pic32wm_bz6204_curiosity/support/openocd.cfg
+@@ -14,13 +14,26 @@ source [find target/pic32wm.cfg]
+ # reset_config none
+ cortex_m reset_config sysresetreq
+ 
++set _HALT_AFTER_RESET 0
++
++$_TARGETNAME configure -event reset-deassert-post {
++    global _HALT_AFTER_RESET
++    pic32cx_bz dsu_reset_deassert
++    if { $_HALT_AFTER_RESET } {
++        catch { halt 4000 }
++        set _HALT_AFTER_RESET 0
++    }
++}
++
+ $_TARGETNAME configure -event gdb-attach {
+-	echo "Debugger attaching: halting execution"
+-	reset halt
+-	gdb_breakpoint_override hard
++    global _HALT_AFTER_RESET
++    echo "Debugger attaching: halting execution"
++    set _HALT_AFTER_RESET 1
++    reset halt
++    gdb_breakpoint_override hard
+ }
+ 
+ $_TARGETNAME configure -event gdb-detach {
+-	echo "Debugger detaching: resuming execution"west flash
+-	resume
++    echo "Debugger detaching: resuming execution"
++    resume
+ }

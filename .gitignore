@@ -15,6 +15,7 @@
 **/*cache*
 **/node_modules
 presentation/
+**/*.docx
 
 # Docusaurus
 gh_pages/build/

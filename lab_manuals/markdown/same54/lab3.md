@@ -1,34 +1,118 @@
 ---
-title: "Lab 3: Add a Shell and Winc1500 to your project"
-sidebar_label: "Lab 3: Add a Shell and Winc1500 to your project"
+title: "Lab 3: Add a Shell and Temperature Sensor to Your Project"
+sidebar_label: "Lab 3: Shell and Temperature Sensor"
 sidebar_position: 5
 ---
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import PreOverlay from './_lab3-pre-overlay.md';
-import PostOverlay from './_lab3-post-overlay.md';
 
-# Lab 3: Add a Shell and Winc1500 to your project
+# Lab 3: Add a Shell and Temperature Sensor to Your Project
+
+## Purpose
+
+In this lab, you will enable the Zephyr shell over UART, inspect the running system with built-in
+shell commands, and add and configure a driver for the AT30TSE758 temperature sensor on the
+Microchip IO1 Xplained Pro.
+
+## Overview
+
+Lab 3 builds on the two-thread project from Lab 2. First you will enable the Zephyr shell and use
+it to inspect devices and threads at runtime. Next you will enable the I²C shell, find the
+temperature sensor on the bus, and describe it in a Devicetree overlay. Finally you will enable
+Zephyr's sensor subsystem and read converted temperature values from the shell.
 
 <PreOverlay />
 
-### Step 3.2: Add a Device Tree Overlay for the ATWINC1500
+### Step 3.2: Find the Temperature Sensor on the I²C Bus
 
-The ATWINC1500-XPRO extension board connects to the SAME54 Xplained Pro via one of its EXT
-headers. The table below shows the relevant signal mappings for the EXT1 connector (the default
-used in this lab). An EXT3 alternative is provided in the collapsible section after the overlay
-listing.
+The Microchip IO1 Xplained Pro includes an AT30TSE758 temperature sensor. In this lab, Zephyr's
+generic LM75-compatible driver will expose the sensor through the sensor subsystem.
 
-| WINC1500 Signal  | XPRO Pin | SAME54 Xplained Pro Port/Pin |
-|------------------|----------|------------------------------|
-| RESET            | 5        | PA6                          |
-| WAKE             | 6        | PA7                          |
-| IRQ              | 9        | PB7                          |
-| CHIP ENABLE      | 10       | PA27                         |
-| SPI CS           | 15       | PB28                         |
+#### 3.2.1: Connect the IO1 Xplained Pro board to the `EXT2` header on the SAME54 Xplained Pro, and then press the `RESET` button.
 
-#### 3.2.2: Create a `boards/` directory inside your `application` directory and create the overlay file:
+The `EXT2` header is connected to a SERCOM peripheral that the SAME54 board definition already
+configures as an I²C controller.
+
+#### 3.2.2: Open `prj.conf` and add the following options to enable the I²C subsystem and its shell commands:
+
+```ini
+CONFIG_GPIO=y
+CONFIG_SHELL=y
+# add-start
+CONFIG_I2C=y
+CONFIG_I2C_SHELL=y
+# add-end
+```
+
+#### 3.2.3: Build and flash the updated firmware:
+
+<Tabs groupId="os">
+  <TabItem value="linux" label="Ubuntu">
+
+  ```bash-session
+  (.venv) $ west build -p always -b %BOARD% application
+  ```
+  ```bash-session
+  (.venv) $ west flash %FLASH_ARGS_LINUX%
+  ```
+
+  </TabItem>
+  <TabItem value="macos" label="macOS">
+
+  ```bash-session
+  (.venv) $ west build -p always -b %BOARD% application
+  ```
+  ```bash-session
+  (.venv) $ west flash %FLASH_ARGS_MACOS%
+  ```
+
+  </TabItem>
+  <TabItem value="windows" label="Windows">
+
+  ```ps-session
+  (.venv) PS C:\...\zephyrproject> west build -p always -b %BOARD% application
+  ```
+  ```ps-session
+  (.venv) PS C:\...\zephyrproject> west flash %FLASH_ARGS_WIN%
+  ```
+
+  </TabItem>
+</Tabs>
+
+#### 3.2.4: Scan the I²C bus from the UART shell:
+
+```bash-session
+uart:~$ i2c scan i2c0
+```
+
+![I²C scan output showing a device at address 0x4f](/images/lab3/i2c_scan_temperature_sensor.png)
+
+The device at address `0x4f` is the IO1 board's temperature sensor.
+
+#### 3.2.5: Read two bytes from the temperature register at address `0x00`:
+
+```bash-session
+uart:~$ i2c read i2c0 4f 00 2
+```
+
+![I²C read output from the temperature sensor at address 0x4f](/images/lab3/i2c_read_temperature_sensor.png)
+
+Use `i2c help` to see the other commands provided by the I²C shell:
+
+```bash-session
+uart:~$ i2c help
+```
+
+---
+
+### Step 3.3: Add a Devicetree Overlay for the Temperature Sensor
+
+The bus scan confirms that hardware responds at `0x4f`. Next, describe that device to Zephyr so
+the LM75-compatible driver can bind to it.
+
+#### 3.3.1: Create a `boards/` directory inside your `application` directory and create the overlay file:
 
 <Tabs groupId="os">
   <TabItem value="linux" label="Ubuntu">
@@ -63,100 +147,175 @@ listing.
   </TabItem>
 </Tabs>
 
-#### 3.2.3: Open `application/boards/%BOARD%.overlay` and add the following Device Tree content to switch SERCOM4 to the XPRO header pins and attach the WINC1500 as a device on that bus:
+#### 3.3.2: Open `application/boards/%BOARD%.overlay` and add the following Devicetree content:
 
 ```dts
-&sercom4 {
-    pinctrl-0 = <&sercom4_spi_xpro>;
-    // bold-next-line
-    cs-gpios = <&portb 28 GPIO_ACTIVE_LOW>;
+&sercom7 {
+    /* sercom7 is enabled as I2C in the base DTS. */
+    #address-cells = <1>;
+    #size-cells = <0>;
 
-    sercom4_cs0_winc1500: WINC1500@0 {
-        compatible = "atmel,winc1500";
-        reg = <0>;
-        spi-max-frequency = <12000000>;
-        // bold-start
-        irq-gpios    = <&portb 7  GPIO_ACTIVE_LOW>;
-        reset-gpios  = <&porta 6 GPIO_ACTIVE_LOW>;
-        enable-gpios = <&porta 7  GPIO_ACTIVE_HIGH>,
-                       <&porta 27  GPIO_ACTIVE_HIGH>;
-        // bold-end
+    temp_sensor: lm75@4f {
+        compatible = "lm75";
+        reg = <0x4f>;
         status = "okay";
     };
 };
 ```
 
 :::info
-`enable-gpios` lists two pins, comma separated.  Since the CHIP_EN pin and the WAKE pin largely share functionality for our demo, listing them both allows the software driver to toggle them together when the chip is enabled or disabled.  You could also use a Devicetree GPIO node to configure the WAKE pin separately to manage it on your own.
+The AT30TSE758 is register-compatible with the LM75 for the operations used in this lab, so the
+generic `lm75` binding and driver can communicate with it.
 :::
 
-{/* FIXME: Validate EXT3 headings */}
-<details>
-<summary>Alternative: EXT3 overlay (SERCOM6)</summary>
+#### 3.3.3: Append the three highlighted options to `prj.conf` to enable the sensor subsystem, its shell commands, and the LM75 driver. Your Lab 3 configuration should now include all of the following:
 
-If your ATWINC1500-XPRO is connected to the EXT3 header instead of EXT1, use the following
-overlay content instead. EXT3 uses SERCOM6 with Port C pins and requires an additional
-`pinctrl` node because the default `sercom6_spi_default` pinmux is not defined in the board
-files.
-
-**EXT3 Pin Mapping**
-
-| WINC1500 Signal  | EXT3 Pin | SAME54 Xplained Pro Port/Pin |
-|------------------|----------|------------------------------|
-| SPI CS           | 15       | PC14                         |
-| SPI MOSI         | 16       | *(pinctrl)*                  |
-| SPI MISO         | 17       | *(pinctrl)*                  |
-| SPI SCK          | 18       | *(pinctrl)*                  |
-| IRQ              | 9        | PC30                         |
-| RESET            | 10       | PC1                          |
-| ENABLE (CHIP EN) | 11       | PC10                         |
-| ENABLE (VCC EN)  | 12       | PC31                         |
-
-```dts
-/
-{
-    aliases {
-    };
-};
-
-&gmac {
-    status = "disabled";
-};
-
-&pinctrl {
-    sercom6_spi_overlay: sercom6_spi_overlay {
-        group1 {
-            pinmux = <PC5C_SERCOM6_PAD1>,
-                     <PC4C_SERCOM6_PAD0>,
-                     <PC7C_SERCOM6_PAD3>;
-        };
-    };
-};
-
-&sercom6 {
-    compatible = "atmel,sam0-spi";
-    dipo = <3>;
-    dopo = <0>;
-    #address-cells = <1>;
-    #size-cells = <0>;
-    cs-gpios = <&portc 14 GPIO_ACTIVE_LOW>;
-    pinctrl-0 = <&sercom6_spi_overlay>;
-    pinctrl-names = "default";
-    status = "okay";
-
-    sercom6_cs0_winc1500: WINC1500@0 {
-        compatible = "atmel,winc1500";
-        reg = <0>;
-        spi-max-frequency = <12000000>;
-        irq-gpios    = <&portc 30 GPIO_ACTIVE_LOW>;
-        reset-gpios  = <&portc 1  GPIO_ACTIVE_LOW>;
-        enable-gpios = <&portc 10 GPIO_ACTIVE_HIGH>,
-                       <&portc 31 GPIO_ACTIVE_HIGH>;
-        status = "okay";
-    };
-};
+```ini
+CONFIG_SHELL=y
+CONFIG_I2C=y
+CONFIG_I2C_SHELL=y
+# add-start
+CONFIG_SENSOR=y
+CONFIG_SENSOR_SHELL=y
+CONFIG_LM75=y
+# add-end
 ```
 
-</details>
+#### 3.3.4: Perform a pristine build, flash the board, and reopen the Serial Monitor:
 
-<PostOverlay />
+<Tabs groupId="os">
+  <TabItem value="linux" label="Ubuntu">
+
+  ```bash-session
+  (.venv) $ west build -p always -b %BOARD% application
+  ```
+  ```bash-session
+  (.venv) $ west flash %FLASH_ARGS_LINUX%
+  ```
+
+  </TabItem>
+  <TabItem value="macos" label="macOS">
+
+  ```bash-session
+  (.venv) $ west build -p always -b %BOARD% application
+  ```
+  ```bash-session
+  (.venv) $ west flash %FLASH_ARGS_MACOS%
+  ```
+
+  </TabItem>
+  <TabItem value="windows" label="Windows">
+
+  ```ps-session
+  (.venv) PS C:\...\zephyrproject> west build -p always -b %BOARD% application
+  ```
+  ```ps-session
+  (.venv) PS C:\...\zephyrproject> west flash %FLASH_ARGS_WIN%
+  ```
+
+  </TabItem>
+</Tabs>
+
+Run `device list` and confirm that `lm75@4f` appears as an initialized device:
+
+```bash-session
+uart:~$ device list
+```
+
+![Zephyr device list showing the LM75-compatible temperature sensor](/images/lab3/shell_device_list_temperature_sensor.png)
+
+---
+
+### Step 3.4: Read the Temperature Through the Sensor Subsystem
+
+#### 3.4.1: Query the sensor by its Devicetree node name:
+
+```bash-session
+uart:~$ sensor get lm75@4f
+```
+
+![Sensor shell output showing the ambient temperature from lm75@4f](/images/lab3/sensor_get_lm75.png)
+
+#### 3.4.2: Query the same sensor by its `temp_sensor` node label:
+
+```bash-session
+uart:~$ sensor get temp_sensor
+```
+
+![Sensor shell output showing the ambient temperature from temp_sensor](/images/lab3/sensor_get_temp_sensor.png)
+
+Place your finger over the sensor and rerun either command several times. Observe how the
+reported ambient temperature changes.
+
+#### 3.4.3: CHALLENGE - Read the Sensor from the Producer Thread
+
+Using what you learned in the previous labs, update `producer.c` to read the current temperature
+and deliver it to `consumer.c` through the message queue.
+
+At the top of `producer.c`, add the device and sensor APIs between the existing Zephyr includes
+and `producer.h`:
+
+```c
+#include <zephyr/kernel.h>
+#include <zephyr/drivers/gpio.h>
+// add-start
+#include <zephyr/device.h>
+#include <zephyr/drivers/sensor.h>
+// add-end
+#include "producer.h"
+```
+
+Below the includes and before `producerThread()`, get the Devicetree node and create a device
+handle:
+
+```c
+#include "producer.h"
+
+// add-start
+#define LM75_NODE DT_NODELABEL(temp_sensor)
+
+static const struct device *const temp_dev = DEVICE_DT_GET(LM75_NODE);
+// add-end
+
+void producerThread(void *inLed, void* inMsgQueue, void*) {
+    ...
+```
+
+Inside the existing `if(counter++>=10)` block, fetch a sample and retrieve the converted
+ambient-temperature value before placing data in the message queue:
+
+```c
+        if(counter++>=10) {
+            // add-start
+            struct sensor_value temp_val;
+
+            sensor_sample_fetch(temp_dev);
+            sensor_channel_get(temp_dev, SENSOR_CHAN_AMBIENT_TEMP, &temp_val);
+            printk("Temperature: %d.%06d C\n", temp_val.val1, temp_val.val2);
+            // add-end
+            k_msgq_put(notifyMsgQueue, &data, K_NO_WAIT);
+            data++;
+            counter = 0;
+        }
+```
+
+:::tip
+Before reading the sensor in application code, use `device_is_ready(temp_dev)` and check the
+return values from `sensor_sample_fetch()` and `sensor_channel_get()`.
+:::
+
+## Results
+
+You enabled Zephyr's shell and I²C support, found the IO1 Xplained Pro temperature sensor on the
+bus, described it in a Devicetree overlay, and read converted temperature values through the
+sensor subsystem.
+
+## Summary
+
+This lab introduced three useful Zephyr development tools:
+
+- The shell provides runtime inspection and interactive access to enabled subsystems.
+- An I²C bus scan can confirm a peripheral's address before a driver is configured.
+- Devicetree and Kconfig work together to describe hardware and include its driver. Once the
+  LM75-compatible device is initialized, both the sensor shell and application code can use
+  Zephyr's common sensor API instead of accessing raw registers directly.

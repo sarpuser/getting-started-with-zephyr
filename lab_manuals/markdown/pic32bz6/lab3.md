@@ -11,6 +11,19 @@ import PostOverlay from './_lab3-post-overlay.md';
 
 # Lab 3: Add a Shell and Winc1500 to your project
 
+## Purpose
+
+In this lab, you will enable the Zephyr shell over UART, inspect running threads with built-in
+shell commands, name threads for easier debugging, add a Devicetree overlay for the ATWINC1500
+Wi-Fi module, and use the network shell to connect to a Wi-Fi access point.
+
+## Overview
+
+Lab 3 builds on the two-thread project from Lab 2. First you will enable the Zephyr shell and
+explore the system at runtime. Next you will write a Devicetree overlay that connects the
+ATWINC1500-XPRO extension board to the %BOARD_NAME%'s SPI peripheral. Finally you will enable
+the required networking options and use the shell to bring up a Wi-Fi connection.
+
 <PreOverlay />
 
 ### Step 3.2: Add a Device Tree Overlay for the ATWINC1500

@@ -1,20 +1,6 @@
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-## Purpose
-
-In this lab, the student will enable the Zephyr shell over UART, inspect running threads with
-built-in shell commands, name threads for easier debugging, add a Device Tree overlay to expose
-the ATWINC1500 Wi-Fi module over SPI, and use the network shell to scan for and connect to a
-Wi-Fi access point.
-
-## Overview
-
-Lab 3 builds on the two-thread project from Lab 2. First you will enable the Zephyr shell and
-explore the system at runtime. Next you will write a Device Tree overlay that wires the
-ATWINC1500-XPRO extension board to the %BOARD_NAME%'s SPI peripheral. Finally you will add the
-necessary Kconfig options and use the network shell to bring up a Wi-Fi connection.
-
 ## Procedure
 
 ### Step 3.1: Enable and Explore the Zephyr Shell
@@ -22,6 +8,8 @@ necessary Kconfig options and use the network shell to bring up a Wi-Fi connecti
 #### 3.1.1: Open `prj.conf` and add the following line to enable the Zephyr shell subsystem:
 
 ```ini
+CONFIG_GPIO=y
+# add-next-line
 CONFIG_SHELL=y
 ```
 

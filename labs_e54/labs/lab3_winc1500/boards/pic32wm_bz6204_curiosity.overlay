@@ -1,0 +1,25 @@
+&pinctrl {
+    sercom4_spi_xpro: sercom4_spi_xpro {
+        group1 {
+            pinmux = <PE5_SCOM4P1_OUT>,   /* SCK  – PAD1 */
+                    <PB3_SCOM4P3_OUT>,   /* MOSI – PAD3 */
+                    <PA4_SCOM4P0_IN>;    /* MISO – PAD0 */
+        };
+    };
+};
+
+&sercom4 {
+    pinctrl-0 = <&sercom4_spi_xpro>;
+    cs-gpios = <&portb 1 GPIO_ACTIVE_LOW>;
+
+    sercom4_cs0_winc1500: WINC1500@0 {
+        compatible = "atmel,winc1500";
+        reg = <0>;
+        spi-max-frequency = <12000000>;
+        irq-gpios    = <&portb 0  GPIO_ACTIVE_LOW>;
+        reset-gpios  = <&portb 14 GPIO_ACTIVE_LOW>;
+        enable-gpios = <&portd 2  GPIO_ACTIVE_HIGH>,
+                       <&portd 3  GPIO_ACTIVE_HIGH>;
+        status = "okay";
+    };
+};

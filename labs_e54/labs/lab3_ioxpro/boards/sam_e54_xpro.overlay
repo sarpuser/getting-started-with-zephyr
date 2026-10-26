@@ -1,0 +1,11 @@
+&sercom7 {
+    /* sercom7 is enabled as I2C in the base DTS. */
+    #address-cells = <1>;
+    #size-cells = <0>;
+
+    temp_sensor: lm75@4f {
+        compatible = "lm75";
+        reg = <0x4f>;
+        status = "okay";
+    };
+};

@@ -1,0 +1,1 @@
+void consumerThread(void*, void*inMsgQueue, void*);

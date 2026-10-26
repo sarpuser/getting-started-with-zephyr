@@ -250,7 +250,32 @@ reported ambient temperature changes.
 #### 3.4.3: CHALLENGE - Read the Sensor from the Producer Thread
 
 Using what you learned in the previous labs, update `producer.c` to read the current temperature
-and deliver it to `consumer.c` through the message queue.
+and deliver it to `consumer.c` through the message queue. The consumer thread then prints each
+reading to the console.
+
+First, disable the shells in `prj.conf`. The application threads will now print to the same
+UART that the shell uses, so the periodic temperature output would interleave with the
+`uart:~$` prompt and any commands you type. Remove the three shell options and keep the drivers:
+
+```ini
+CONFIG_GPIO=y
+# remove-next-line
+CONFIG_SHELL=y
+CONFIG_I2C=y
+# remove-next-line
+CONFIG_I2C_SHELL=y
+CONFIG_SENSOR=y
+# remove-next-line
+CONFIG_SENSOR_SHELL=y
+CONFIG_LM75=y
+```
+
+When your code is complete, perform a pristine build and flash the board. The Serial Monitor
+should print a new temperature reading about once per second. Place your finger over the sensor
+and watch the value rise.
+
+<details>
+<summary>Solution</summary>
 
 At the top of `producer.c`, add the device and sensor APIs between the existing Zephyr includes
 and `producer.h`:
@@ -266,7 +291,7 @@ and `producer.h`:
 ```
 
 Below the includes and before `producerThread()`, get the Devicetree node and create a device
-handle:
+handle. These declarations must be at file scope, outside the thread function:
 
 ```c
 #include "producer.h"
@@ -278,31 +303,77 @@ static const struct device *const temp_dev = DEVICE_DT_GET(LM75_NODE);
 // add-end
 
 void producerThread(void *inLed, void* inMsgQueue, void*) {
-    ...
 ```
 
-Inside the existing `if(counter++>=10)` block, fetch a sample and retrieve the converted
-ambient-temperature value before placing data in the message queue:
+Inside `producerThread()`, change `data` to a signed value (temperatures can be negative) and
+confirm that the sensor driver initialized before entering the loop:
+
+```c
+    struct gpio_dt_spec *toggleLED = (struct gpio_dt_spec*)inLed;
+    struct k_msgq *notifyMsgQueue = (struct k_msgq*)inMsgQueue;
+    bool led_state = true;
+    int counter = 0;
+    // highlight-next-line
+    int32_t data = 0;
+
+    // add-start
+    if (!device_is_ready(temp_dev)) {
+        printk("(producer) Temperature sensor %s is not ready\n", temp_dev->name);
+        return;
+    }
+    // add-end
+
+    while (1) {
+```
+
+Replace the body of the existing `if(counter++>=10)` block so that it fetches a sample, converts
+it to milli-degrees Celsius, and places that value in the message queue:
 
 ```c
         if(counter++>=10) {
+            // remove-start
+            k_msgq_put(notifyMsgQueue, &data, K_NO_WAIT);
+            data++;
+            // remove-end
             // add-start
             struct sensor_value temp_val;
 
-            sensor_sample_fetch(temp_dev);
-            sensor_channel_get(temp_dev, SENSOR_CHAN_AMBIENT_TEMP, &temp_val);
-            printk("Temperature: %d.%06d C\n", temp_val.val1, temp_val.val2);
+            if (sensor_sample_fetch(temp_dev) == 0 &&
+                sensor_channel_get(temp_dev, SENSOR_CHAN_AMBIENT_TEMP, &temp_val) == 0) {
+                /* Send the temperature in milli-degrees Celsius. */
+                data = (int32_t)sensor_value_to_milli(&temp_val);
+                k_msgq_put(notifyMsgQueue, &data, K_NO_WAIT);
+            } else {
+                printk("(producer) Failed to read temperature\n");
+            }
             // add-end
-            k_msgq_put(notifyMsgQueue, &data, K_NO_WAIT);
-            data++;
             counter = 0;
         }
 ```
 
-:::tip
-Before reading the sensor in application code, use `device_is_ready(temp_dev)` and check the
-return values from `sensor_sample_fetch()` and `sensor_channel_get()`.
+:::info
+A `struct sensor_value` holds an integer part (`val1`) and a fractional part in millionths
+(`val2`). `sensor_value_to_milli()` combines them into a single integer, which fits in the
+existing 4-byte message queue slots without changing `main.c`.
 :::
+
+Finally, update `consumer.c` to receive the temperature as a signed value and print it:
+
+```c
+void consumerThread(void*, void*inMsgQueue, void*){
+    struct k_msgq *notifyMsgQueue = (struct k_msgq*)inMsgQueue;
+    // highlight-next-line
+    int32_t data = 0;
+
+    while (1) {
+        k_msgq_get(notifyMsgQueue, &data, K_FOREVER);
+        // add-next-line
+        printk("(consumer) Temperature: %d.%03d C\n", data / 1000, data % 1000);
+    }
+}
+```
+
+</details>
 
 ## Results
 

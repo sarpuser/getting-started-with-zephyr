@@ -9,7 +9,7 @@
 
 const boardMap = {
   same54: {
-    BOARD:            'same54_xpro',
+    BOARD:            'same_54_xpro',
     BOARD_NAME:       'SAM E54 Xplained Pro',
     FLASH_ARGS_LINUX: '',
     FLASH_ARGS_MACOS: '',
